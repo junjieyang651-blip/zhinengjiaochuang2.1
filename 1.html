@@ -167,14 +167,14 @@
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span style="font-size:12px;font-family:'Courier New',monospace;color:#c8d6e5;letter-spacing:1px">{{ currentTime }}</span>
                     <span style="font-size:11px;color:#64748b">|</span>
-                    <span style="font-size:11px;color:#f97316">⚠️ 应急响应 III级</span>
+                    <span style="font-size:11px;color:#f97316">⚠️ 二级响应 · S203滑坡处置中</span>
                 </div>
                 <div class="dash-header-title">重庆山区公路应急数字孪生演练系统</div>
                 <div class="dash-header-right">
                     <button @click="showPlanModal=true" class="btn-glow" style="font-size:11px;padding:4px 12px">🤖 智能方案</button>
                     <span id="weatherDisplay" style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:3px">🌤️ 重庆武隆 加载中...</span>
                     <span style="font-size:11px;color:#94a3b8">|</span>
-                    <span style="font-size:11px;color:#34d399">在线用户：5人</span>
+                    <span style="font-size:11px;color:#34d399">在线用户：8人（指挥中心/现场/专家）</span>
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-glow"></span>
                     <span>管理员 · 在线</span>
                 </div>
@@ -185,15 +185,17 @@
                 <div id="mainMap" class="w-full h-full"></div>
                 <div v-if="currentTab==='hall'" class="float-info" style="top:10px;left:300px">
                     <p class="text-cyan-400 font-bold text-xs">📡 重庆山区公路数字孪生监测平台</p>
-                    <p style="font-size:10px">▪ 覆盖 G319 武隆段 / S202 城口 / G65 渝湘段山区</p>
-                    <p style="font-size:10px">▪ 实时灾害点：滑坡、积水、路面塌陷（集中武隆区域）</p>
+                    <p style="font-size:10px">▪ 覆盖 G319 武隆段 / S203 省道 / G65 渝湘段山区</p>
+                    <p style="font-size:10px">▪ 今日重点：S203 K124+300 山体滑坡 · 二级响应</p>
+                    <p style="font-size:10px">▪ 实时回传：无人机 1 架 · 位移传感器 12 个 · 车辆 10 台</p>
                 </div>
-                <div v-if="currentTab==='hall'" class="float-info" style="bottom:10px;right:10px;max-width:240px;border-color:rgba(0,200,255,.4)">
+                <div v-if="currentTab==='hall'" class="float-info" style="bottom:10px;right:10px;max-width:260px;border-color:rgba(0,200,255,.4)">
                     <div class="font-bold text-cyan-400">⚠️ 气象预警快报</div>
-                    <div style="font-size:10px">武隆区: 暴雨橙色预警 | 24h累计雨量78mm</div>
+                    <div style="font-size:10px">武隆区: 暴雨橙色预警 | 24h累计雨量 78mm</div>
+                    <div style="font-size:10px">S203 滑坡区: 降雨持续 · 已加密监测至 5min/次</div>
                     <div style="font-size:10px">城口县: 山洪蓝色风险 | 注意S202省道边坡</div>
                     <div style="font-size:10px">G65包茂高速: 能见度较低 限速60km/h</div>
-                    <div class="mt-1 text-emerald-300" style="font-size:10px">▪ 应急响应等级: III级</div>
+                    <div class="mt-1 text-emerald-300" style="font-size:10px">▪ 应急响应等级: 二级响应 · 持续 16 小时</div>
                 </div>
                 <div v-if="['flood','slide','subsidence'].includes(currentTab)" class="float-info" style="top:10px;left:50%;transform:translateX(-50%);pointer-events:auto;border-color:rgba(249,115,22,.5)">
                     <span class="text-orange-400 font-bold">🎯 {{ getScenarioName(currentTab) }} · 动态推演</span>
@@ -220,20 +222,24 @@
                     <div id="monthTrendChart" style="height:120px"></div>
                 </div>
                 <div class="dash-panel">
-                    <div class="panel-title">灾害预警统计</div>
-                    <div class="ind-row"><span class="ind-label">山体滑坡隐患</span><span class="ind-val hl">12 处<small style="color:#64748b">（本月3起）</small></span></div>
-                    <div class="ind-row"><span class="ind-label">路基塌陷隐患</span><span class="ind-val hl">5 处</span></div>
-                    <div class="ind-row"><span class="ind-label">洪涝风险路段</span><span class="ind-val hl">8 处</span></div>
-                    <div class="ind-row"><span class="ind-label">年度累计预警</span><span class="ind-val">67 次</span></div>
-                    <div class="ind-row"><span class="ind-label">预警响应率</span><span class="ind-val">98.5%</span></div>
-                    <div class="ind-row"><span class="ind-label">应急响应等级</span><span class="ind-val hl">III级</span></div>
+                    <div class="panel-title">今日重点案例 · 5·16 S203滑坡</div>
+                    <div class="ind-row"><span class="ind-label">灾害类型</span><span class="ind-val hl">山体滑坡</span></div>
+                    <div class="ind-row"><span class="ind-label">发生位置</span><span class="ind-val">S203 K124+300</span></div>
+                    <div class="ind-row"><span class="ind-label">滑坡规模</span><span class="ind-val hl">约 3200m³</span></div>
+                    <div class="ind-row"><span class="ind-label">影响道路</span><span class="ind-val">S203 半幅阻断</span></div>
+                    <div class="ind-row"><span class="ind-label">应急响应等级</span><span class="ind-val hl">二级响应</span></div>
+                    <div class="ind-row"><span class="ind-label">当前状态</span><span class="ind-val">半幅抢通·持续监测</span></div>
+                    <div class="ind-row"><span class="ind-label">处置队伍</span><span class="ind-val">武隆抢通一队/二队</span></div>
+                    <div class="ind-row"><span class="ind-label">累计清运</span><span class="ind-val">1800m³</span></div>
                 </div>
                 <div class="dash-panel">
-                    <div class="panel-title">应急核心指标</div>
-                    <div class="ind-row"><span class="ind-label">平均首报时间</span><span class="ind-val">{{ responseMetrics.avg_response_min }} min</span></div>
-                    <div class="ind-row"><span class="ind-label">队伍平均到达</span><span class="ind-val">{{ responseMetrics.team_arrival_min }} min</span></div>
-                    <div class="ind-row"><span class="ind-label">半幅抢通时间</span><span class="ind-val">{{ responseMetrics.half_clear_time }}</span></div>
-                    <div class="ind-row"><span class="ind-label">全幅恢复时间</span><span class="ind-val">6h 30m</span></div>
+                    <div class="panel-title">5·16 案例应急核心指标</div>
+                    <div class="ind-row"><span class="ind-label">监测预警触发</span><span class="ind-val">08:15:22</span></div>
+                    <div class="ind-row"><span class="ind-label">灾害首报时间</span><span class="ind-val">28 min</span></div>
+                    <div class="ind-row"><span class="ind-label">队伍平均到达</span><span class="ind-val">35 min</span></div>
+                    <div class="ind-row"><span class="ind-label">半幅抢通时间</span><span class="ind-val">2h 15m</span></div>
+                    <div class="ind-row"><span class="ind-label">全幅恢复时间</span><span class="ind-val">3h 25m</span></div>
+                    <div class="ind-row"><span class="ind-label">社会车辆滞留</span><span class="ind-val">1辆（人员已撤离）</span></div>
                     <div class="ind-row"><span class="ind-label">年度演练次数</span><span class="ind-val">{{ responseMetrics.annual_drills }} 次</span></div>
                 </div>
             </div>
@@ -268,7 +274,8 @@
                         <div class="team-row" v-for="t in teams" :key="t.name"><span><span :class="['team-dot',t.cls]"></span>{{t.name}}</span><span :class="['team-status',t.cls]">{{t.status}}</span></div>
                     </div>
                     <div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(0,200,255,.2)">
-                        <div class="ind-row"><span class="ind-label">应急抢险队合计</span><span class="ind-val">4支 / 128人</span></div>
+                        <div class="ind-row"><span class="ind-label">5·16现场力量</span><span class="ind-val">3组 / 36人 / 10台装备</span></div>
+                        <div class="ind-row"><span class="ind-label">应急抢险队合计</span><span class="ind-val">6支 / 160人</span></div>
                         <div class="ind-row"><span class="ind-label">养护巡查组</span><span class="ind-val">12组 / 36人</span></div>
                         <div class="ind-row"><span class="ind-label">技术专家组</span><span class="ind-val">1组 / 8人</span></div>
                         <div class="ind-row"><span class="ind-label">当前在岗率</span><span class="ind-val">92.3%</span></div>
@@ -613,28 +620,31 @@
                     { id:'physics', name:'UE4仿真', icon:'🔬', external:true, url:'physics_demo.html' }
                 ];
                 const topStats = [
-                    { label:'重庆山区预警', value:'橙色大雨', unit:'28mm/h', color:'text-orange-400' },
-                    { label:'在线任务', value:'3', unit:'个', color:'text-blue-400' },
-                    { label:'资源编组', value:'5', unit:'组', color:'text-green-400' },
-                    { label:'综合评分', value:'88', unit:'分', color:'text-yellow-400' }
+                    { label:'当前响应等级', value:'二级响应', unit:'持续16小时', color:'text-orange-400' },
+                    { label:'在线处置任务', value:'1', unit:'个主任务+3个子任务', color:'text-blue-400' },
+                    { label:'现场资源编组', value:'4', unit:'组·32人', color:'text-green-400' },
+                    { label:'今日综合评分', value:'86.4', unit:'分', color:'text-yellow-400' }
                 ];
                 const skills = [
                     {name:'应急指挥能力',val:93},{name:'资源调度效率',val:89},{name:'风险研判精准度',val:87},{name:'规范执行水平',val:91},
                     {name:'装备操作熟练度',val:94},{name:'团队协作能力',val:88},{name:'信息报送时效',val:90},{name:'科技应用能力',val:85}
                 ];
                 const eventChain = [
-                    {time:'08:15:22',title:'灾害初报',icon:'⚠️',iconColor:'text-red-400',desc:'武隆区 S203 省道 K124+300 发生山体滑坡，初步估算方量3000m³，交通中断。',scores:[{label:'时效性',value:88,color:'#22c55e',textColor:'#4ade80'},{label:'准确性',value:85,color:'#3b82f6',textColor:'#60a5fa'},{label:'完整性',value:82,color:'#eab308',textColor:'#facc15'}]},
-                    {time:'08:32:07',title:'预警发布',icon:'📢',iconColor:'text-blue-400',desc:'启动三级应急响应，通过情报板、公众号、交通广播发布绕行信息。',scores:[{label:'时效性',value:95,color:'#22c55e',textColor:'#4ade80'},{label:'覆盖面',value:98,color:'#3b82f6',textColor:'#60a5fa'},{label:'联动效率',value:92,color:'#eab308',textColor:'#facc15'}]},
-                    {time:'08:50:44',title:'应急队伍抵达',icon:'🚜',iconColor:'text-amber-400',desc:'装载机3台、挖掘机2台，应急抢险人员22人到达现场。',scores:[{label:'响应速度',value:92,color:'#22c55e',textColor:'#4ade80'},{label:'装备匹配',value:96,color:'#3b82f6',textColor:'#60a5fa'},{label:'人员配置',value:90,color:'#eab308',textColor:'#facc15'}]}
+                    {time:'08:15:22',title:'边坡监测预警',icon:'📡',iconColor:'text-red-400',desc:'S203 K124+300 边坡位移传感器触发红色预警，位移速率 3.2mm/h 且持续增长。',scores:[{label:'预警时效',value:96,color:'#22c55e',textColor:'#4ade80'},{label:'数据准确率',value:94,color:'#3b82f6',textColor:'#60a5fa'},{label:'覆盖路段',value:100,color:'#eab308',textColor:'#facc15'}]},
+                    {time:'08:23:45',title:'灾害现场确认',icon:'⚠️',iconColor:'text-red-400',desc:'巡查无人机回传：滑坡体约 3200m³，半幅路面被埋，一辆社会车辆滞留（人员已撤离）。',scores:[{label:'信息完整度',value:92,color:'#22c55e',textColor:'#4ade80'},{label:'上报时效',value:88,color:'#3b82f6',textColor:'#60a5fa'},{label:'视频清晰度',value:90,color:'#eab308',textColor:'#facc15'}]},
+                    {time:'08:31:06',title:'应急联动启动',icon:'📢',iconColor:'text-blue-400',desc:'区交通局、交警大队、养护中心三方会商，启动二级应急响应，对外发布绕行方案。',scores:[{label:'会商效率',value:95,color:'#22c55e',textColor:'#4ade80'},{label:'信息发布',value:97,color:'#3b82f6',textColor:'#60a5fa'},{label:'警力联动',value:93,color:'#eab308',textColor:'#facc15'}]},
+                    {time:'08:50:44',title:'抢险队伍抵达',icon:'🚜',iconColor:'text-amber-400',desc:'武隆抢通一队 32 人、挖掘机 2 台、装载机 2 台、自卸车 6 台到达 K124+200 集结点。',scores:[{label:'响应速度',value:91,color:'#22c55e',textColor:'#4ade80'},{label:'装备匹配',value:96,color:'#3b82f6',textColor:'#60a5fa'},{label:'人员到位率',value:100,color:'#eab308',textColor:'#facc15'}]},
+                    {time:'09:15:00',title:'半幅抢通完成',icon:'✅',iconColor:'text-green-400',desc:'完成土石方清运约 1800m³，S203 半幅路面恢复通行，滞留车辆有序放行。',scores:[{label:'抢通效率',value:89,color:'#22c55e',textColor:'#4ade80'},{label:'安全管控',value:86,color:'#3b82f6',textColor:'#60a5fa'},{label:'交通组织',value:90,color:'#eab308',textColor:'#facc15'}]},
+                    {time:'11:40:22',title:'险情处置完毕',icon:'🏁',iconColor:'text-cyan-400',desc:'滑坡体全部清运，边坡防护网铺设完成，路段恢复双向通行，转入后期监测。',scores:[{label:'处置彻底性',value:93,color:'#22c55e',textColor:'#4ade80'},{label:'次生灾害防控',value:94,color:'#3b82f6',textColor:'#60a5fa'},{label:'恢复通行效率',value:91,color:'#eab308',textColor:'#facc15'}]}
                 ];
                 // 大屏面板数据
                 const teams = ref([
-                    {name:'武隆抢通一队（32人）',status:'执行中',cls:'active'},
-                    {name:'武隆抢通二队（30人）',status:'执行中',cls:'active'},
+                    {name:'武隆抢通一队（32人）',status:'S203现场作业',cls:'active'},
+                    {name:'武隆抢通二队（30人）',status:'K124远端分流',cls:'active'},
+                    {name:'武隆巡查无人机组（4人）',status:'边坡监测中',cls:'active'},
                     {name:'城口防汛三队（28人）',status:'待命',cls:'standby'},
                     {name:'黔江应急四队（38人）',status:'待命',cls:'standby'},
-                    {name:'涪陵桥梁五队（24人）',status:'休整',cls:'rest'},
-                    {name:'南川地质专家组（8人）',status:'待命',cls:'standby'}
+                    {name:'渝东南地质专家组（8人）',status:'技术研判',cls:'standby'}
                 ]);
                 
                 // 动态数据状态
@@ -655,12 +665,12 @@
                     lighting:   { total: 32, online: 29 }
                 });
                 const alerts = [
-                    {id:1,content:'S203 K124+300 山体滑坡预警升级，建议启动二级响应',time:'2025-05-16 08:23',color:'red',status:'处置中',statusCls:'pending'},
-                    {id:2,content:'G319 武隆段 K56+800 积水深度超0.5m，交通管制中',time:'2025-05-15 14:10',color:'orange',status:'已处理',statusCls:'handled'},
-                    {id:3,content:'城口 S202 K38+200 边坡位移预警，持续监测',time:'2025-05-14 22:45',color:'yellow',status:'监测中',statusCls:'handled'},
-                    {id:4,content:'S204 K89+100 暴雨预警（橙色），小源地淹没风险升高',time:'2025-05-14 18:37',color:'orange',status:'已响应',statusCls:'handled'},
-                    {id:5,content:'G65 渝湘高速 K203+500 能见度低于100m，限速60km/h',time:'2025-05-14 06:12',color:'yellow',status:'已处理',statusCls:'handled'},
-                    {id:6,content:'G319 K78+600 路面沉陷监测异常，已调地质雷达探测',time:'2025-05-13 11:05',color:'orange',status:'已处置',statusCls:'handled'},
+                    {id:1,content:'S203 K124+300 山体滑坡：二级响应已启动，半幅已抢通',time:'2025-05-16 08:31',color:'red',status:'处置中',statusCls:'pending'},
+                    {id:2,content:'S203 K124+300 边坡位移红色预警：位移速率 3.2mm/h',time:'2025-05-16 08:15',color:'red',status:'已触发',statusCls:'pending'},
+                    {id:3,content:'武隆抢通一队抵达现场：32人/挖掘机2台/装载机2台/自卸车6台',time:'2025-05-16 08:50',color:'orange',status:'执行中',statusCls:'handled'},
+                    {id:4,content:'G319 武隆段 K56+800 积水深度 0.45m，已降速管制',time:'2025-05-15 14:10',color:'orange',status:'已处理',statusCls:'handled'},
+                    {id:5,content:'S204 K89+100 暴雨橙色预警，小源地淹没风险升高',time:'2025-05-14 18:37',color:'orange',status:'已响应',statusCls:'handled'},
+                    {id:6,content:'城口 S202 K38+200 边坡位移预警，持续监测',time:'2025-05-14 22:45',color:'yellow',status:'监测中',statusCls:'handled'},
                     {id:7,content:'武隆仙女山景区公路 K4+300 落石预警，已设置防护网',time:'2025-05-12 16:50',color:'red',status:'已处置',statusCls:'handled'},
                     {id:8,content:'S501 武隆兵赋公路 K15+100 路基冲刷预警',time:'2025-05-11 09:33',color:'yellow',status:'监测中',statusCls:'handled'}
                 ];
@@ -671,24 +681,38 @@
                 const showPlanModal = ref(false);
                 const planLoading = ref(false);
                 const planResult = ref(null);
-                const planForm = ref({disaster_type:'landslide',scale:'large',location:'武隆区S203省道',road_info:'S203省道 K124+300'});
+                const planForm = ref({disaster_type:'landslide',scale:'large',location:'武隆区S203省道K124+300',road_info:'S203省道双向两车道山区公路，当日暴雨橙色预警'});
 
-                // 国标自动评分
+                // 国标自动评分 · 5·16 S203山体滑坡实战案例指标
                 const evalLoading = ref(false);
                 const evalResult = ref(null);
-                const sampleMetrics = {drill_name:'2025年武隆区S203山体滑坡应急演练',drill_date:'2025-05-20',metrics:{first_report_time_min:28,warning_publish_time_min:17,warning_channels:4,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,electronic_tag_rate:100,work_zone_compliance:86,traffic_control_time_min:12,safety_training_pass_rate:96,archive_completeness:100,improvement_closure_rate:95}};
+                const sampleMetrics = {
+                    drill_name:'2025年5月16日武隆区S203省道K124+300山体滑坡应急处置演练',
+                    drill_date:'2025-05-16',
+                    location:'武隆区S203省道K124+300',
+                    disaster_type:'landslide',
+                    events:[
+                        {time:'08:15:22',event:'边坡位移传感器红色预警',type:'warning_trigger'},
+                        {time:'08:23:45',event:'巡查无人机现场确认滑坡体约3200m³',type:'first_report'},
+                        {time:'08:31:06',event:'启动二级应急响应并发布绕行信息',type:'warning_publish'},
+                        {time:'08:50:44',event:'武隆抢通一队32人及装备抵达现场',type:'team_arrival'},
+                        {time:'09:15:00',event:'完成半幅抢通，滞留车辆放行',type:'half_road_clear'},
+                        {time:'11:40:22',event:'滑坡体清运完毕，恢复双向通行',type:'drill_end'}
+                    ],
+                    metrics:{first_report_time_min:28,warning_publish_time_min:17,warning_channels:5,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,electronic_tag_rate:100,work_zone_compliance:86,traffic_control_time_min:12,safety_training_pass_rate:96,emergency_communication_rate:97,archive_completeness:100,improvement_closure_rate:95,drill_record_timeliness:98}
+                };
 
                 // 可编辑的演练参数
-                const defaultEvalParams = {first_report_time_min:28,warning_publish_time_min:17,warning_channels:4,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,work_zone_compliance:86};
+                const defaultEvalParams = {first_report_time_min:28,warning_publish_time_min:17,warning_channels:5,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,work_zone_compliance:86};
                 const evalParams = ref({...defaultEvalParams});
                 const resetEvalParams = ()=>{evalParams.value={...defaultEvalParams};};
 
-                // 改进计划
+                // 改进计划 · 针对5·16案例暴露的问题
                 const improvementPlan = ref([
-                    {issue:'无人机图传延迟',owner:'信息科王强',deadline:'2025-06-10',status:'进行中',statusCls:'badge'},
-                    {issue:'夜间照明覆盖不足',owner:'装备科李敏',deadline:'2025-06-05',status:'已完成',statusCls:'badge'},
-                    {issue:'作业区布设规范培训',owner:'安全科刘勇',deadline:'2025-06-15',status:'待启动',statusCls:'badge'},
-                    {issue:'物资电子化率提升',owner:'物资科赵亮',deadline:'2025-06-20',status:'进行中',statusCls:'badge'}
+                    {issue:'作业区布设规范度不足（86%）',owner:'安全科刘勇',deadline:'2025-05-25',status:'进行中',statusCls:'badge'},
+                    {issue:'半幅抢通时间略超标准（125min）',owner:'武隆抢通一队张建国',deadline:'2025-05-30',status:'待启动',statusCls:'badge'},
+                    {issue:'坡体积水抽排装备预置不足',owner:'装备科李敏',deadline:'2025-06-05',status:'进行中',statusCls:'badge'},
+                    {issue:'应急通信覆盖率需提升至98%以上',owner:'信息科王强',deadline:'2025-06-10',status:'待启动',statusCls:'badge'}
                 ]);
 
                 const generatePlan = async () => {
@@ -723,16 +747,16 @@
                     finally{evalLoading.value=false;}
                 };
 
-                const getScenarioName=(tab)=>({flood:'常规防汛演练',slide:'山体滑坡处置演练',subsidence:'路面塌陷应急演练'}[tab]);
+                const getScenarioName=(tab)=>({flood:'5·16 滑坡区排水保障演练',slide:'5·16 S203山体滑坡处置演练',subsidence:'5·16 滑坡诱发塌陷巡查演练'}[tab]);
                 const showToast=(msg)=>{toast.value=msg;setTimeout(()=>toast.value='',2500)};
                 const login=()=>{if(loginUsername.value==='Admin'&&loginPassword.value==='123456'){isLoggedIn.value=true;currentTab.value='hall';showToast('登录成功');nextTick(()=>{initAllMaps();initDashboardCharts();setTimeout(loadDynamicData,500);});}else showToast('账户或密码错误');};
                 const openExternal=(url)=>{window.open(url,'_blank');};
                 const setActiveTab=(id)=>{currentTab.value=id;nextTick(()=>{initAllMaps();if(id==='hall')initDashboardCharts();if(['flood','slide','subsidence'].includes(id))initScenarioCharts(id);if(id==='eval')initEvalCharts();if(id==='user')initUserCharts();});};
                 const executeAction=(type)=>{let msg={clear:'🚜 机械清障执行中，半幅抢通已完成',pump:'💧 抽排水单元部署，积水深度下降',warning:'⚠️ 警告区设置完毕'}[type];showToast(msg);};
-                const getActionBtnText=(tab,btnType)=>({flood:{clear:'疏通排水沟渠',pump:'启动抽水泵组',warning:'设置水位警示牌'},slide:{clear:'清理滑坡土石',pump:'排除坡体积水',warning:'布设边坡监测仪'},subsidence:{clear:'回填塌陷坑洞',pump:'注浆加固地基',warning:'封闭绕行引导'}}[tab][btnType]);
-                const getRadarTitle=(tab)=>({flood:'防汛处置能力雷达',slide:'滑坡抢通能力雷达',subsidence:'塌陷修复能力雷达'}[tab]);
-                const getBarTitle=(tab)=>({flood:'排涝与管控指标',slide:'清障与监测指标',subsidence:'加固与绕行指标'}[tab]);
-                const getEvalTitle=(tab)=>({flood:'防汛应急评估细则',slide:'滑坡处置评估细则',subsidence:'塌陷抢修评估细则'}[tab]);
+                const getActionBtnText=(tab,btnType)=>({flood:{clear:'疏通滑坡区排水沟',pump:'启动坡体积水抽排',warning:'设置水位警示牌'},slide:{clear:'清理滑坡土石',pump:'排除坡体积水',warning:'布设边坡监测仪'},subsidence:{clear:'回填塌陷坑洞',pump:'注浆加固地基',warning:'封闭绕行引导'}}[tab][btnType]);
+                const getRadarTitle=(tab)=>({flood:'滑坡区排水保障能力',slide:'滑坡抢通能力雷达',subsidence:'塌陷修复能力雷达'}[tab]);
+                const getBarTitle=(tab)=>({flood:'排水保障指标',slide:'清障与监测指标',subsidence:'加固与绕行指标'}[tab]);
+                const getEvalTitle=(tab)=>({flood:'排水保障评估细则',slide:'滑坡处置评估细则',subsidence:'塌陷抢修评估细则'}[tab]);
                 const getEvalItems=(tab)=>{const dd=generateDrillData(tab);return dd.evalItems;};
                 // ========== 动态演练数据生成器 ==========
                 const drillDataSeed = ref(0); // 刷新计数器，点击刷新按钮时递增
