@@ -17,7 +17,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 #hud-top h1{font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:600;color:rgba(200,230,255,.92);letter-spacing:2px;text-shadow:0 0 18px rgba(100,180,255,.6)}
 #hud-top .sub{font-size:10px;color:rgba(120,180,220,.6);margin-top:3px;letter-spacing:1px}
 /* 聊天 UI */
-#chat-panel{position:fixed;left:22px;top:50%;transform:translateY(-50%);width:220px;display:flex;flex-direction:column;gap:9px;z-index:15;pointer-events:none}
+#chat-panel{position:fixed;right:20px;bottom:90px;width:218px;display:flex;flex-direction:column;gap:8px;z-index:15;pointer-events:none;max-height:60vh;overflow:hidden}
 .bubble{background:rgba(18,26,38,.72);backdrop-filter:blur(10px);border:1px solid rgba(80,140,200,.18);border-radius:18px;padding:10px 14px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:11.5px;line-height:1.65;color:rgba(210,235,255,.88);text-shadow:0 0 8px rgba(120,200,255,.35);box-shadow:0 2px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04)}
 .bubble.right{align-self:flex-end;background:rgba(20,40,65,.68);border-color:rgba(60,120,200,.22)}
 .bubble .meta{font-size:9px;color:rgba(100,160,210,.5);margin-bottom:4px}
@@ -131,14 +131,14 @@ function terrainColor(h,slope,wet){
   var n=fn(h*.015,slope*8,2);
   var r,g,b;
   // 深夜：暗绿山林 + 深岩石 + 偶尔路面反光
-  if(h<12){r=0.04+n*.02;g=0.07+n*.03;b=0.12+n*.04} // 谷底暗水
-  else if(h<40){r=0.08+n*.05;g=0.14+n*.06;b=0.10+n*.04} // 湿土
-  else if(h<120){r=0.06+n*.05;g=0.14+n*.07;b=0.08+n*.04} // 山林暗绿
-  else if(h<220){r=0.10+n*.06;g=0.11+n*.05;b=0.10+n*.05} // 深岩
-  else{r=0.15+n*.07;g=0.13+n*.06;b=0.12+n*.05} // 山顶岩石
-  if(slope>0.55){var s=(slope-0.55)*1.8;r=r*(1-s)+0.12*s;g=g*(1-s)+0.10*s;b=b*(1-s)+0.09*s}
+  if(h<12){r=0.04+n*.02;g=0.06+n*.02;b=0.09+n*.03} // 谷底暗水
+  else if(h<40){r=0.07+n*.04;g=0.09+n*.04;b=0.10+n*.04} // 湿土（青灰）
+  else if(h<120){r=0.06+n*.04;g=0.09+n*.05;b=0.10+n*.05} // 深夜山林（冷青灰绿）
+  else if(h<220){r=0.09+n*.05;g=0.10+n*.05;b=0.12+n*.05} // 岩石（偏蓝灰）
+  else{r=0.13+n*.06;g=0.14+n*.06;b=0.17+n*.06} // 山顶（冷灰）
+  if(slope>0.55){var s=(slope-0.55)*1.8;r=r*(1-s)+0.11*s;g=g*(1-s)+0.10*s;b=b*(1-s)+0.12*s}
   // 雨后湿润 + 冷蓝色调偏移
-  if(wet){b=Math.min(1,b+0.02);g=Math.min(1,g+0.008)}
+  if(wet){r=Math.max(0,r-0.005);b=Math.min(1,b+0.025)}
   return{r:Math.min(1,r),g:Math.min(1,g),b:Math.min(1,b)};
 }
 
@@ -149,8 +149,8 @@ function initScene(){
   scene.fog=new THREE.Fog(0x030810,2200,9000);
 
   camera=new THREE.PerspectiveCamera(62,W/H,0.5,12000);
-  camera.position.set(120,95,800);
-  camera.lookAt(0,40,-400);
+  camera.position.set(180,55,300);
+  camera.lookAt(0,30,-100);
 
   var cv=document.getElementById('cv');
   renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
@@ -165,7 +165,7 @@ function initScene(){
   controls.enableDamping=true;controls.dampingFactor=0.05;
   controls.maxPolarAngle=Math.PI*0.48;
   controls.minDistance=80;controls.maxDistance=3000;
-  controls.target.set(0,40,-200);
+  controls.target.set(0,30,-100);
 
   // 深夜环境光（稍亮以看清地形）
   scene.add(new THREE.AmbientLight(0x0a1828,2.2));
@@ -183,6 +183,8 @@ function initScene(){
 
   // 体积雾粒子（山间薄雾）
   buildFogParticles();
+  // 月亮光晓
+  buildMoonGlow();
   // 地形
   buildTerrain();
   // 公路
@@ -351,6 +353,37 @@ function buildFogParticles(){
   scene.add(new THREE.Points(geo2,mat2));
 }
 
+// ---------- 月亮光晓 ----------
+function buildMoonGlow(){
+  // 半月圆盘
+  var moonGeo=new THREE.CircleGeometry(80,32);
+  var moonMat=new THREE.MeshBasicMaterial({color:0xc8ddf0,transparent:true,opacity:0.55,depthWrite:false});
+  var moon=new THREE.Mesh(moonGeo,moonMat);
+  moon.position.set(-3200,2800,-4000);
+  moon.lookAt(0,0,0);
+  scene.add(moon);
+  // 月晚化光晓
+  var halos=[{r:140,o:0.15},{r:220,o:0.07},{r:340,o:0.03}];
+  halos.forEach(function(h){
+    var g=new THREE.CircleGeometry(h.r,32);
+    var m=new THREE.MeshBasicMaterial({color:0x8ab8e8,transparent:true,opacity:h.o,depthWrite:false});
+    var mesh=new THREE.Mesh(g,m);
+    mesh.position.set(-3200,2800,-4000);
+    mesh.lookAt(0,0,0);
+    scene.add(mesh);
+  });
+  // 天边微光带（地平线遥远处）
+  var glowGeo=new THREE.PlaneGeometry(14000,180);
+  var glowMat=new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,
+    uniforms:{},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'varying vec2 vUv;void main(){float a=pow(1.0-abs(vUv.y*2.0-1.0),2.0)*0.18;gl_FragColor=vec4(0.2,0.4,0.7,a);}'
+  });
+  var glowMesh=new THREE.Mesh(glowGeo,glowMat);
+  glowMesh.position.set(0,160,-4500);
+  scene.add(glowMesh);
+}
 // ---------- 星空 ----------
 function buildStars(){
   var count=3000;
