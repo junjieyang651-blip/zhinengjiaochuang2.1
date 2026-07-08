@@ -1073,8 +1073,7 @@
                     else if(type==='landslide'){ctx.fillStyle='#4a5b6e';ctx.fillRect(0,0,w,h*0.5);ctx.fillStyle='#78350f';for(let i=0;i<30;i++){ctx.beginPath();ctx.arc(w*0.3+Math.random()*w*0.5,h*0.5+Math.random()*20,3+Math.random()*5,0,2*Math.PI);ctx.fill();}ctx.fillStyle='#f97316';ctx.font='bold 12px "PingFang SC"';ctx.fillText('滑坡体 约3000m³',w*0.35,h*0.8);ctx.fillText('半幅阻断·紧急清障',w*0.35,h*0.9);}
                     else{ctx.fillStyle='#475569';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1e293b';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.2,h*0.15,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#0f172a';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.15,h*0.1,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#ef4444';ctx.font='bold 12px "PingFang SC"';ctx.fillText('⚠️ 路面塌陷',w*0.35,h*0.82);}
                 };
-                // Esri卫星影像(支持CORS,WebGL可渲染) + AWS地形高程
-                const terrainTile='https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png';
+                // Esri卫星影像(支持CORS,WebGL可渲染) —— 先移除terrain测试黑屏根因
                 const toLngLat=c=>[c[1],c[0]]; // WGS84
                 const initMap=(containerId,markersData)=>{
                     const container=document.getElementById(containerId);if(!container)return;
@@ -1085,8 +1084,7 @@
                         style:{
                             version:8,
                             sources:{
-                                satellite:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:20},
-                                terrain:{type:'raster-dem',tiles:[terrainTile],encoding:'terrarium',tileSize:256,maxzoom:14}
+                                satellite:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:20}
                             },
                             layers:[{id:'satellite',type:'raster',source:'satellite'}],
                             sky:{'sky-color':'#a0c8e8','sky-horizon-blend':0.5,'horizon-color':'#d0e0f0','horizon-fog-blend':0.2,'fog-color':'#d0e0f0','fog-ground-blend':0.12},
@@ -1105,8 +1103,7 @@
                     map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
                     map.dragRotate.enable();map.touchZoomRotate.enable();
                     map.on('load',()=>{
-                        // 启用 3D 地形高程（夸张系数 1.5）
-                        map.setTerrain({source:'terrain',exaggeration:1.5});
+                        // terrain 暂时移除以排查黑屏（确认后再换可用DEM源）
                         // ===== 自定义地名标注（纯卫星图上叠加清晰地名） =====
                         const placeLabels=[{name:'武隆城区',coord:[29.323,107.758]},{name:'S203 K124+300 滑坡点',coord:[29.35,107.77],hl:true},{name:'仙女山镇',coord:[29.38,107.82]},{name:'江口镇',coord:[29.30,107.80]},{name:'火炉镇',coord:[29.36,107.73]},{name:'G65 武隆互通',coord:[29.35,107.76]},{name:'乌江',coord:[29.34,107.79]},{name:'羊角镇',coord:[29.29,107.75]}];
                         placeLabels.forEach(p=>{const lngLat=toLngLat(p.coord);const el=document.createElement('div');el.style.cssText=p.hl?'background:rgba(239,68,68,.85);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;border:1px solid #fca5a5;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,.8)':'background:rgba(6,18,36,.78);color:#00e0ff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;border:1px solid rgba(0,200,255,.45);white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,200,255,.6),0 0 2px rgba(0,0,0,.8)';el.textContent=p.name;new maplibregl.Marker(el).setLngLat(lngLat).addTo(map);});
