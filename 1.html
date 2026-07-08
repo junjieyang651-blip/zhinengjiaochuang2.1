@@ -1085,10 +1085,10 @@
                         style:{
                             version:8,
                             sources:{
-                                satellite:{type:'raster',tiles:['https://webst0.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst1.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst2.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst3.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}'],tileSize:256,maxzoom:20},
+                                satellite:{type:'raster',tiles:['https://webst0.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}','https://webst1.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}','https://webst2.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}','https://webst3.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}'],tileSize:256,maxzoom:20},
                                 terrain:{type:'raster-dem',tiles:[terrainTile],encoding:'terrarium',tileSize:256,maxzoom:14}
                             },
-                            layers:[{id:'satellite',type:'raster',source:'satellite'}],
+                            layers:[{id:'satellite',type:'raster',source:'satellite',paint:{'raster-opacity':0.95}}],
                             sky:{'sky-color':'#0a1628','sky-horizon-blend':0.5,'horizon-color':'#0d2137','horizon-fog-blend':0.6,'fog-color':'#0a1628','fog-ground-blend':0.6},
                             light:{anchor:'viewport',color:'#ffffff',intensity:0.6}
                         },
@@ -1105,8 +1105,11 @@
                     map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
                     map.dragRotate.enable();map.touchZoomRotate.enable();
                     map.on('load',()=>{
-                        // 启用 3D 地形高程（夸张系数 1.6 让山区起伏更明显）
-                        map.setTerrain({source:'terrain',exaggeration:1.6});
+                        // 启用 3D 地形高程（夸张系数 2.0 让山区起伏更震撼）
+                        map.setTerrain({source:'terrain',exaggeration:2.0});
+                        // ===== 自定义地名标注（纯卫星图上叠加清晰地名） =====
+                        const placeLabels=[{name:'武隆城区',coord:[29.323,107.758]},{name:'S203 K124+300 滑坡点',coord:[29.35,107.77],hl:true},{name:'仙女山镇',coord:[29.38,107.82]},{name:'江口镇',coord:[29.30,107.80]},{name:'火炉镇',coord:[29.36,107.73]},{name:'G65 武隆互通',coord:[29.35,107.76]},{name:'乌江',coord:[29.34,107.79]},{name:'羊角镇',coord:[29.29,107.75]}];
+                        placeLabels.forEach(p=>{const lngLat=toLngLat(p.coord);const el=document.createElement('div');el.style.cssText=p.hl?'background:rgba(239,68,68,.85);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;border:1px solid #fca5a5;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,.8)':'background:rgba(6,18,36,.78);color:#00e0ff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;border:1px solid rgba(0,200,255,.45);white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,200,255,.6),0 0 2px rgba(0,0,0,.8)';el.textContent=p.name;new maplibregl.Marker(el).setLngLat(lngLat).addTo(map);});
                         // ===== 主要监测路段 GeoJSON line 图层 =====
                         const g319Coords=[[29.305,107.695],[29.315,107.705],[29.325,107.718],[29.33,107.725],[29.335,107.735],[29.34,107.745],[29.345,107.755],[29.35,107.762],[29.355,107.77],[29.36,107.778],[29.365,107.785],[29.37,107.793],[29.375,107.802],[29.38,107.81],[29.385,107.82],[29.39,107.832],[29.395,107.842]].map(toLngLat);
                         const s203Coords=[[29.29,107.748],[29.305,107.752],[29.32,107.758],[29.335,107.762],[29.35,107.77],[29.36,107.775],[29.375,107.78],[29.39,107.785],[29.405,107.792],[29.42,107.798]].map(toLngLat);
