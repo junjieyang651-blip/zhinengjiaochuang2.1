@@ -1073,29 +1073,26 @@
                     else if(type==='landslide'){ctx.fillStyle='#4a5b6e';ctx.fillRect(0,0,w,h*0.5);ctx.fillStyle='#78350f';for(let i=0;i<30;i++){ctx.beginPath();ctx.arc(w*0.3+Math.random()*w*0.5,h*0.5+Math.random()*20,3+Math.random()*5,0,2*Math.PI);ctx.fill();}ctx.fillStyle='#f97316';ctx.font='bold 12px "PingFang SC"';ctx.fillText('滑坡体 约3000m³',w*0.35,h*0.8);ctx.fillText('半幅阻断·紧急清障',w*0.35,h*0.9);}
                     else{ctx.fillStyle='#475569';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1e293b';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.2,h*0.15,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#0f172a';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.15,h*0.1,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#ef4444';ctx.font='bold 12px "PingFang SC"';ctx.fillText('⚠️ 路面塌陷',w*0.35,h*0.82);}
                 };
-                // 高德卫星影像(国内稳定可用) + AWS地形高程
+                // Esri卫星影像(支持CORS,WebGL可渲染) + AWS地形高程
                 const terrainTile='https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png';
-                // WGS84->GCJ02（高德底图为火星坐标）
-                const wgs2gcj=(lat,lng)=>{const PI=3.14159265358979324,a=6378245.0,ee=0.00669342162296594323;const tL=(x,y)=>{let r=-100+2*x+3*y+0.2*y*y+0.1*x*y+0.2*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*PI)+20*Math.sin(2*x*PI))*2/3;r+=(20*Math.sin(y*PI)+40*Math.sin(y/3*PI))*2/3;r+=(160*Math.sin(y/12*PI)+320*Math.sin(y*PI/30))*2/3;return r;};const tG=(x,y)=>{let r=300+x+2*y+0.1*x*x+0.1*x*y+0.1*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*PI)+20*Math.sin(2*x*PI))*2/3;r+=(20*Math.sin(x*PI)+40*Math.sin(x/3*PI))*2/3;r+=(150*Math.sin(x/12*PI)+300*Math.sin(x/30*PI))*2/3;return r;};let dLat=tL(lng-105,lat-35),dLng=tG(lng-105,lat-35);const rL=lat/180*PI;let m=Math.sin(rL);m=1-ee*m*m;const sm=Math.sqrt(m);dLat=dLat*180/((a*(1-ee))/(m*sm)*PI);dLng=dLng*180/(a/sm*Math.cos(rL)*PI);return[lat+dLat,lng+dLng];};
-                const toLngLat=c=>{const[gl,gn]=wgs2gcj(c[0],c[1]);return[gn,gl];};
+                const toLngLat=c=>[c[1],c[0]]; // WGS84
                 const initMap=(containerId,markersData)=>{
                     const container=document.getElementById(containerId);if(!container)return;
                     if(window.mapCache&&window.mapCache[containerId])window.mapCache[containerId].remove();
-                    // MapLibre 3D 地形地图：高德卫星(国内稳定) + 地形高程 + 倾斜视角
-                    const cGCJ=wgs2gcj(29.35,107.77);
+                    // MapLibre 3D 地形地图：Esri卫星(CORS) + 地形高程 + 倾斜视角
                     const map=new maplibregl.Map({
                         container:containerId,
                         style:{
                             version:8,
                             sources:{
-                                satellite:{type:'raster',tiles:['https://webst0.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst1.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst2.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst3.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}'],tileSize:256,maxzoom:20},
+                                satellite:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:20},
                                 terrain:{type:'raster-dem',tiles:[terrainTile],encoding:'terrarium',tileSize:256,maxzoom:14}
                             },
                             layers:[{id:'satellite',type:'raster',source:'satellite'}],
-                            sky:{'sky-color':'#0a1628','sky-horizon-blend':0.5,'horizon-color':'#0d2137','horizon-fog-blend':0.6,'fog-color':'#0a1628','fog-ground-blend':0.6},
-                            light:{anchor:'viewport',color:'#ffffff',intensity:0.6}
+                            sky:{'sky-color':'#a0c8e8','sky-horizon-blend':0.5,'horizon-color':'#d0e0f0','horizon-fog-blend':0.2,'fog-color':'#d0e0f0','fog-ground-blend':0.12},
+                            light:{anchor:'viewport',color:'#ffffff',intensity:0.85}
                         },
-                        center:[cGCJ[1],cGCJ[0]],
+                        center:[107.77,29.35],
                         zoom:13,
                         pitch:58,
                         bearing:-25,
@@ -1108,8 +1105,8 @@
                     map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
                     map.dragRotate.enable();map.touchZoomRotate.enable();
                     map.on('load',()=>{
-                        // 启用 3D 地形高程（夸张系数 2.0 让山区起伏更震撼）
-                        map.setTerrain({source:'terrain',exaggeration:2.0});
+                        // 启用 3D 地形高程（夸张系数 1.5）
+                        map.setTerrain({source:'terrain',exaggeration:1.5});
                         // ===== 自定义地名标注（纯卫星图上叠加清晰地名） =====
                         const placeLabels=[{name:'武隆城区',coord:[29.323,107.758]},{name:'S203 K124+300 滑坡点',coord:[29.35,107.77],hl:true},{name:'仙女山镇',coord:[29.38,107.82]},{name:'江口镇',coord:[29.30,107.80]},{name:'火炉镇',coord:[29.36,107.73]},{name:'G65 武隆互通',coord:[29.35,107.76]},{name:'乌江',coord:[29.34,107.79]},{name:'羊角镇',coord:[29.29,107.75]}];
                         placeLabels.forEach(p=>{const lngLat=toLngLat(p.coord);const el=document.createElement('div');el.style.cssText=p.hl?'background:rgba(239,68,68,.85);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;border:1px solid #fca5a5;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,.8)':'background:rgba(6,18,36,.78);color:#00e0ff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;border:1px solid rgba(0,200,255,.45);white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,200,255,.6),0 0 2px rgba(0,0,0,.8)';el.textContent=p.name;new maplibregl.Marker(el).setLngLat(lngLat).addTo(map);});
@@ -1261,7 +1258,7 @@
                                 el.style.cssText=`width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px ${color};opacity:0.85;cursor:pointer`;
                                 el.title=`M${eq.magnitude} ${eq.location}`;
                                 const popup=new maplibregl.Popup({offset:15}).setHTML(`<div style="color:#fff;font-size:11px"><b>🌍 地震活动</b><br>M${eq.magnitude} | 深度${eq.depth}km<br>${eq.location}<br>时间：${eq.time}</div>`);
-                                const eqC=wgs2gcj(eq.lat,eq.lon);new maplibregl.Marker(el).setLngLat([eqC[1],eqC[0]]).setPopup(popup).addTo(map);
+                                new maplibregl.Marker(el).setLngLat([eq.lon,eq.lat]).setPopup(popup).addTo(map);
                             });
                             if (eqs.length) showToast(`🌍 加载了 ${eqs.length} 条地震活动记录`);
                         }
