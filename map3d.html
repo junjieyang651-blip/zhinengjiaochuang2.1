@@ -181,12 +181,16 @@ function initScene(){
   moon.position.set(-600,900,-400);scene.add(moon);
 }
 
-// ── Bloom 后处理 ──────────────────────────────────────────────────
+// ── Bloom 后处理（有降级兜底） ─────────────────────────────────────
 function initBloom(){
-  composer=new THREE.EffectComposer(renderer);
-  composer.addPass(new THREE.RenderPass(scene,camera));
-  var bloom=new THREE.UnrealBloomPass(new THREE.Vector2(W,H),0.85,0.55,0.32);
-  composer.addPass(bloom);
+  try{
+    composer=new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene,camera));
+    var bloom=new THREE.UnrealBloomPass(new THREE.Vector2(W,H),0.95,0.6,0.28);
+    composer.addPass(bloom);
+  }catch(e){
+    console.warn('Bloom not available, using direct render');composer=null;
+  }
 }
 
 // ── 天空球 ────────────────────────────────────────────────────────
@@ -301,7 +305,7 @@ function buildLamps(){
 
     // 灯头（高发光强度，Bloom 捕捉）
     var head=new THREE.Mesh(new THREE.SphereGeometry(.52,8,8),
-      new THREE.MeshStandardMaterial({color:0xd8ecff,emissive:0xa0d0ff,emissiveIntensity:6,roughness:.08,metalness:.15}));
+      new THREE.MeshStandardMaterial({color:0xe0f0ff,emissive:0xb0d8ff,emissiveIntensity:8,roughness:.06,metalness:.1}));
     head.position.set(lp.x,lp.y+11.2,lp.z);scene.add(head);
 
     // 光锥（Additive 叠加半透明锥体）
@@ -320,7 +324,7 @@ function buildLamps(){
     gm.position.set(lp.x,lp.y+.4,lp.z);scene.add(gm);
 
     // PointLight（冷蓝，无阴影优先性能；每5盏投一次影）
-    var pl=new THREE.PointLight(0x85baee,3.4,100,1.8);
+    var pl=new THREE.PointLight(0x90c8f8,4.8,110,1.7);
     pl.position.copy(head.position);
     if(i%5===0){pl.castShadow=true;pl.shadow.mapSize.set(256,256);pl.shadow.bias=-.003;}
     scene.add(pl);
@@ -389,7 +393,7 @@ function animate(){
     controls.target.lerp(new THREE.Vector3(ahead.x,ahead.y+10,ahead.z),.01);
   }
   controls.update();
-  composer.render();
+  if(composer)composer.render();else renderer.render(scene,camera);
 }
 
 // ── 窗口自适应 ───────────────────────────────────────────────────
