@@ -1103,7 +1103,7 @@
                     map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
                     map.dragRotate.enable();map.touchZoomRotate.enable();
                     map.on('load',()=>{
-                        // terrain 暂时移除以排查黑屏（确认后再换可用DEM源）
+                        // 3D地形将在卫星瓦片加载完成后延迟启用（见下方 idle 事件，避免初始化时序冲突）
                         // ===== 自定义地名标注（纯卫星图上叠加清晰地名） =====
                         const placeLabels=[{name:'武隆城区',coord:[29.323,107.758]},{name:'S203 K124+300 滑坡点',coord:[29.35,107.77],hl:true},{name:'仙女山镇',coord:[29.38,107.82]},{name:'江口镇',coord:[29.30,107.80]},{name:'火炉镇',coord:[29.36,107.73]},{name:'G65 武隆互通',coord:[29.35,107.76]},{name:'乌江',coord:[29.34,107.79]},{name:'羊角镇',coord:[29.29,107.75]}];
                         placeLabels.forEach(p=>{const lngLat=toLngLat(p.coord);const el=document.createElement('div');el.style.cssText=p.hl?'background:rgba(239,68,68,.85);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;border:1px solid #fca5a5;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,.8)':'background:rgba(6,18,36,.78);color:#00e0ff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;border:1px solid rgba(0,200,255,.45);white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,200,255,.6),0 0 2px rgba(0,0,0,.8)';el.textContent=p.name;new maplibregl.Marker(el).setLngLat(lngLat).addTo(map);});
@@ -1156,6 +1156,13 @@
                             el.addEventListener('mouseleave',()=>{if(hoverTimer)clearTimeout(hoverTimer);setTimeout(()=>hoverPopup.remove(),100);});
                             // 弹窗打开后绑定 canvas 绘制和按钮事件
                             popup.on('open',()=>{setTimeout(()=>{const c=document.getElementById(uid);if(c){c.width=280;c.height=90;drawSceneImage(m.type,uid);}const ab=document.getElementById(`btn_action_${uid}`);if(ab)ab.onclick=(e)=>{e.stopPropagation();showToast(`✅ 已启动${m.name}处置方案：${m.suggestion}`);};const sb=document.getElementById(`btn_snapshot_${uid}`);if(sb)sb.onclick=(e)=>{e.stopPropagation();showToast(`📸 现场快照已导出 (${m.name})`);};},50);});
+                        });
+                        // 延迟启用3D地形：等卫星瓦片全部加载后再加terrain，避免初始化时序冲突导致黑屏
+                        map.once('idle',()=>{
+                            if(!map.getSource('terrain')){
+                                map.addSource('terrain',{type:'raster-dem',tiles:['https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png'],encoding:'terrarium',tileSize:256,maxzoom:14});
+                                map.setTerrain({source:'terrain',exaggeration:1.5});
+                            }
                         });
                     });
                     window.mapCache=window.mapCache||{};window.mapCache[containerId]=map;setTimeout(()=>map.resize(),200);return map;
