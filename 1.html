@@ -13,8 +13,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }
     </script>
@@ -41,8 +41,8 @@
         .duty-info span{color:#00e0ff;font-weight:bold}
         /* 全屏地图 */
         .fullscreen-map{position:fixed;top:84px;left:0;right:0;bottom:48px;z-index:1}
-        .leaflet-container{background:var(--bg-dark)!important}
-        .leaflet-container img{image-rendering:auto}
+        .maplibregl-map,.maplibregl-canvas{background:var(--bg-dark)!important}
+        .maplibregl-ctrl-attrib{font-size:9px!important;background:rgba(6,18,36,.6)!important;color:#64748b!important}.maplibregl-ctrl-attrib a{color:#64748b!important}
         /* 数据面板 */
         .dash-panel{position:relative;background:var(--panel-bg);backdrop-filter:blur(12px);border:1px solid rgba(0,200,255,0.15);box-shadow:0 0 20px rgba(0,200,255,.08),inset 0 0 20px rgba(0,200,255,.03),0 4px 30px rgba(0,0,0,.3);padding:12px 14px;margin-bottom:10px;border-radius:2px}
         .dash-panel::before,.dash-panel::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(0,200,255,.5);border-style:solid;pointer-events:none}
@@ -79,9 +79,12 @@
         /* 内容覆盖层 */
         .content-overlay{position:fixed;top:66px;left:10px;right:10px;bottom:58px;z-index:12;overflow-y:auto;background:rgba(6,30,60,.8);backdrop-filter:blur(6px);border-radius:2px;border:1px solid var(--border-glow);padding:16px}
         /* 地图标记 */
-        .custom-marker{background:#ef4444;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 8px red;cursor:pointer}
-        .custom-marker-flood{background:#3b82f6;box-shadow:0 0 8px #3b82f6}.custom-marker-landslide{background:#f97316;box-shadow:0 0 8px #f97316}.custom-marker-subsidence{background:#8b5cf6;box-shadow:0 0 8px #8b5cf6}
-        .leaflet-popup-content-wrapper{background:#0f172a;color:#fff;border-left:3px solid var(--cyan);border-radius:8px;max-width:340px;min-width:280px;box-shadow:0 8px 20px rgba(0,0,0,.6)}.leaflet-popup-tip{background:#0f172a}
+        .maplibregl-marker{cursor:pointer}
+        .maplibregl-popup-content-wrapper{background:#0f172a;color:#fff;border-left:3px solid var(--cyan);border-radius:8px;max-width:340px;min-width:280px;box-shadow:0 8px 20px rgba(0,0,0,.6)}.maplibregl-popup-content{margin:12px 14px;font-size:12px}
+        .maplibregl-popup-tip{border-left:0;border-top-color:#0f172a!important}
+        .maplibregl-popup-close-button{color:#64748b!important;font-size:16px!important;padding:4px 8px!important}
+        .maplibregl-popup-close-button:hover{color:#fff!important;background:transparent!important}
+        .maplibregl-ctrl-group{background:rgba(6,18,36,.85)!important;border:1px solid rgba(0,200,255,.3)!important}.maplibregl-ctrl-group button{background:transparent!important}.maplibregl-ctrl-group button:hover{background:rgba(0,200,255,.15)!important}.maplibregl-ctrl-icon{filter:invert(.8) hue-rotate(140deg)}
         /* 保留样式 */
         .risk-bar-bg{background:#334155;height:8px;border-radius:4px;overflow:hidden;width:100%}.risk-bar-fill{height:100%;border-radius:4px}
         .scene-canvas{width:100%;height:100px;background:#1e293b;border-radius:8px;margin-top:8px;display:block;border:1px solid #334155}
@@ -97,13 +100,7 @@
         .modal-content{background:linear-gradient(135deg,#0d2137,#112b4a);border:1px solid var(--border-glow);border-radius:8px;padding:1.5rem;max-width:800px;width:90%;max-height:85vh;overflow-y:auto}
         .float-info{position:absolute;z-index:5;background:rgba(6,30,60,.9);backdrop-filter:blur(8px);border:1px solid var(--border-glow);border-radius:4px;padding:8px 10px;font-size:11px;pointer-events:none}
         .login-panel{background:var(--panel-bg);backdrop-filter:blur(12px);border:1px solid var(--border-glow);box-shadow:0 0 30px rgba(0,200,255,.1)}
-        /* 道路发光效果 */
-        .road-glow-g319{filter:drop-shadow(0 0 4px #00e5ff) drop-shadow(0 0 8px rgba(0,229,255,.4))}
-        .road-glow-s203{filter:drop-shadow(0 0 4px #00b8d4) drop-shadow(0 0 8px rgba(0,184,212,.4))}
-        .road-glow-g65{filter:drop-shadow(0 0 4px #40c4ff) drop-shadow(0 0 8px rgba(64,196,255,.4))}
-        .road-tooltip{background:rgba(6,30,60,.9)!important;color:#00e0ff!important;border:1px solid rgba(0,200,255,.4)!important;font-size:11px!important;font-weight:bold!important;padding:2px 8px!important;border-radius:3px!important;box-shadow:0 0 8px rgba(0,200,255,.3)!important}
-        .road-tooltip::before{border-top-color:rgba(0,200,255,.4)!important}
-        .leaflet-tooltip.road-tooltip::before{border-top-color:rgba(0,200,255,.4)!important}
+        /* 地图道路发光效果已由MapLibre line-glow图层实现 */
         @keyframes pulse-glow{0%,100%{opacity:.6}50%{opacity:1}}.animate-pulse-glow{animation:pulse-glow 2s ease-in-out infinite}
         /* ===== 面板滑入动画 ===== */
         @keyframes slideInLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
@@ -147,6 +144,7 @@
         .team-dot.standby{background:#3b82f6;box-shadow:0 0 4px #3b82f6}
         .team-dot.rest{background:#6b7280}
         @keyframes pulseDot{0%,100%{box-shadow:0 0 4px #10b981}50%{box-shadow:0 0 12px #10b981,0 0 24px rgba(16,185,129,.3)}}
+        @keyframes pulseRing{0%{transform:scale(0.8);opacity:0.7}100%{transform:scale(2.2);opacity:0}}
         /* ===== 现场视频/照片模拟窗口 ===== */
         .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
         .video-box{background:#07121f;border:1px solid rgba(0,200,255,.2);border-radius:4px;overflow:hidden}
@@ -161,9 +159,8 @@
         .photo-strip{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px}
         .photo-thumb{flex-shrink:0;width:80px;height:55px;background:#07121f;border:1px solid rgba(0,200,255,.15);border-radius:3px;overflow:hidden}
         .photo-sim{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8;text-align:center;line-height:1.2}
-        /* ===== 地图Hover信息卡片 ===== */
-        .leaflet-tooltip.map-hover-tooltip{background:rgba(6,30,60,.92)!important;backdrop-filter:blur(12px);border:1px solid rgba(0,200,255,.3)!important;border-radius:8px!important;color:#fff!important;padding:0!important;box-shadow:0 8px 24px rgba(0,0,0,.5)!important;max-width:260px}
-        .leaflet-tooltip.map-hover-tooltip::before{border-top-color:rgba(0,200,255,.3)!important}
+        /* 地图Hover信息卡片 */
+        .maplibregl-popup.map-hover-popup .maplibregl-popup-content-wrapper{background:rgba(6,30,60,.92)!important;backdrop-filter:blur(12px);border:1px solid rgba(0,200,255,.3)!important;border-left:3px solid var(--cyan);border-radius:8px!important;box-shadow:0 8px 24px rgba(0,0,0,.5)!important;max-width:260px;min-width:200px}
         .map-hover-card{padding:10px 12px;position:relative;overflow:hidden}
         .map-hover-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00c8ff,#0e7490);border-radius:8px 8px 0 0}
         .map-hover-card-title{font-weight:bold;color:#00c8ff;margin-bottom:6px;font-size:12px;padding-top:4px}
@@ -1075,61 +1072,92 @@
                 };
                 // Esri卫星图（国内可正常访问，高清卫星影像）
                 const satelliteTile='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+                // AWS Terrarium 地形高程瓦片（免费开源，MapLibre原生支持）
+                const terrainTile='https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png';
+                const toLngLat=c=>[c[1],c[0]]; // [lat,lng]->[lng,lat]
                 const initMap=(containerId,markersData)=>{
                     const container=document.getElementById(containerId);if(!container)return;
                     if(window.mapCache&&window.mapCache[containerId])window.mapCache[containerId].remove();
-                    // 地图实例：maxZoom 18，确保所有图层都有数据
-                    const map=L.map(containerId,{
-                        zoomControl:true,
-                        scrollWheelZoom:true,
-                        doubleClickZoom:true,
+                    // MapLibre 3D 地形地图：卫星影像 + 地形高程 + 倾斜视角
+                    const map=new maplibregl.Map({
+                        container:containerId,
+                        style:{
+                            version:8,
+                            sources:{
+                                satellite:{type:'raster',tiles:[satelliteTile],tileSize:256,maxzoom:18,attribution:'&copy; Esri'},
+                                terrain:{type:'raster-dem',tiles:[terrainTile],encoding:'terrarium',tileSize:256,maxzoom:14}
+                            },
+                            layers:[{id:'satellite',type:'raster',source:'satellite'}],
+                            sky:{'sky-color':'#0a1628','sky-horizon-blend':0.5,'horizon-color':'#0d2137','horizon-fog-blend':0.6,'fog-color':'#0a1628','fog-ground-blend':0.6},
+                            light:{anchor:'viewport',color:'#ffffff',intensity:0.6}
+                        },
+                        center:[107.77,29.35],
+                        zoom:12.5,
+                        pitch:58,
+                        bearing:-25,
                         maxZoom:18,
-                        minZoom:10
-                    }).setView([29.35,107.77],14);
-                    // Esri 卫星影像底图（原生支持到18级，不会出现无数据）
-                    L.tileLayer(satelliteTile,{
-                        maxZoom:18,
-                        tileSize:256,
-                        attribution:'&copy; Esri'
-                    }).addTo(map);
-                    // CartoDB 地名标注图层（叠加在卫星底图之上，maxZoom 18）
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{
-                        maxZoom:18,
-                        opacity:0.85,
-                        subdomains:'abcd'
-                    }).addTo(map);
-                    // ===== 主要监测路段 Polyline 高亮 =====
-                    // G319 武隆段（南北走向）
-                    const g319Coords=[[29.305,107.695],[29.315,107.705],[29.325,107.718],[29.33,107.725],[29.335,107.735],[29.34,107.745],[29.345,107.755],[29.35,107.762],[29.355,107.77],[29.36,107.778],[29.365,107.785],[29.37,107.793],[29.375,107.802],[29.38,107.81],[29.385,107.82],[29.39,107.832],[29.395,107.842]];
-                    L.polyline(g319Coords,{color:'#00e5ff',weight:4,opacity:0.85,className:'road-glow-g319'}).addTo(map).bindTooltip('G319 武隆段',{sticky:true,className:'road-tooltip'});
-                    // S203 省道（东北-西南走向）
-                    const s203Coords=[[29.29,107.748],[29.305,107.752],[29.32,107.758],[29.335,107.762],[29.35,107.77],[29.36,107.775],[29.375,107.78],[29.39,107.785],[29.405,107.792],[29.42,107.798]];
-                    L.polyline(s203Coords,{color:'#00b8d4',weight:3.5,opacity:0.85,className:'road-glow-s203'}).addTo(map).bindTooltip('S203 省道',{sticky:true,className:'road-tooltip'});
-                    // G65 渝湘高速（南北走向偏西）
-                    const g65Coords=[[29.41,107.728],[29.395,107.735],[29.38,107.742],[29.365,107.75],[29.35,107.76],[29.34,107.77],[29.325,107.782],[29.31,107.795],[29.295,107.808],[29.28,107.82]];
-                    L.polyline(g65Coords,{color:'#40c4ff',weight:4,opacity:0.8,className:'road-glow-g65'}).addTo(map).bindTooltip('G65 渝湘高速',{sticky:true,className:'road-tooltip'});
-                    // ===== 灾害点虚线连接（监测网络覆盖） =====
-                    if(markersData.length>1){
-                        const connCoords=markersData.map(m=>m.coord);
-                        L.polyline(connCoords,{color:'#00c8ff',weight:1.5,opacity:0.45,dashArray:'8,6'}).addTo(map);
-                        // 在连接线中点标注"监测网络"
-                        if(connCoords.length>=2){
-                            const midLat=(connCoords[0][0]+connCoords[1][0])/2;
-                            const midLng=(connCoords[0][1]+connCoords[1][1])/2;
-                            L.marker([midLat,midLng],{icon:L.divIcon({className:'',html:'<div style="color:#00c8ff;font-size:9px;white-space:nowrap;background:rgba(6,30,60,.7);padding:1px 4px;border-radius:2px;border:1px solid rgba(0,200,255,.3)">🔗 监测网络</div>',iconSize:[60,14],iconAnchor:[30,7]})}).addTo(map);
-                        }
-                    }
-                    // ===== 灾害标记点 =====
-                    markersData.forEach(m=>{
-                        let mc='custom-marker';if(m.type==='flood')mc='custom-marker-flood';else if(m.type==='landslide')mc='custom-marker-landslide';else if(m.type==='subsidence')mc='custom-marker-subsidence';
-                        const icon=L.divIcon({className:mc,iconSize:[14,14],popupAnchor:[0,-10]});
-                        const uid=`canvas_${containerId}_${m.name.replace(/\s/g,'')}_${Date.now()}_${Math.random()}`;
-                        const marker=L.marker(m.coord,{icon}).addTo(map);marker.bindPopup(buildPopupContent(m,uid));
-                        const riskColor=m.riskIndex>=80?'#ef4444':m.riskIndex>=60?'#f97316':'#3b82f6';const riskLevel=m.riskIndex>=80?'高风险':m.riskIndex>=60?'中风险':'低风险';
-                        marker.bindTooltip(`<div class="map-hover-card"><div class="map-hover-card-title">${m.name}</div><div class="map-hover-card-row"><span class="map-hover-card-label">风险指数</span><span class="map-hover-card-value" style="color:${riskColor}">${m.riskIndex} · ${riskLevel}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">当前状态</span><span class="map-hover-card-value">${m.currentPhase}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">建议措施</span><span style="color:#94a3b8;font-size:9px">${m.suggestion.substring(0,20)}...</span></div></div>`,{direction:'top',offset:[0,-10],className:'map-hover-tooltip',opacity:1});
-                        marker.on('popupopen',()=>{setTimeout(()=>{const c=document.getElementById(uid);if(c){c.width=280;c.height=100;drawSceneImage(m.type,uid);}const ab=document.getElementById(`btn_action_${uid}`);if(ab)ab.onclick=(e)=>{e.stopPropagation();showToast(`✅ 已启动${m.name}处置方案：${m.suggestion}`);};const sb=document.getElementById(`btn_snapshot_${uid}`);if(sb)sb.onclick=(e)=>{e.stopPropagation();showToast(`📸 现场快照已导出 (${m.name})`);};},50);});
+                        minZoom:9,
+                        maxPitch:75,
+                        antialias:true
                     });
-                    window.mapCache=window.mapCache||{};window.mapCache[containerId]=map;setTimeout(()=>map.invalidateSize(),200);return map;
+                    map.addControl(new maplibregl.NavigationControl({visualizePitch:true,showCompass:true,showZoom:true}),'top-right');
+                    map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
+                    map.dragRotate.enable();map.touchZoomRotate.enable();
+                    map.on('load',()=>{
+                        // 启用 3D 地形高程（夸张系数 1.6 让山区起伏更明显）
+                        map.setTerrain({source:'terrain',exaggeration:1.6});
+                        // ===== 主要监测路段 GeoJSON line 图层 =====
+                        const g319Coords=[[29.305,107.695],[29.315,107.705],[29.325,107.718],[29.33,107.725],[29.335,107.735],[29.34,107.745],[29.345,107.755],[29.35,107.762],[29.355,107.77],[29.36,107.778],[29.365,107.785],[29.37,107.793],[29.375,107.802],[29.38,107.81],[29.385,107.82],[29.39,107.832],[29.395,107.842]].map(toLngLat);
+                        const s203Coords=[[29.29,107.748],[29.305,107.752],[29.32,107.758],[29.335,107.762],[29.35,107.77],[29.36,107.775],[29.375,107.78],[29.39,107.785],[29.405,107.792],[29.42,107.798]].map(toLngLat);
+                        const g65Coords=[[29.41,107.728],[29.395,107.735],[29.38,107.742],[29.365,107.75],[29.35,107.76],[29.34,107.77],[29.325,107.782],[29.31,107.795],[29.295,107.808],[29.28,107.82]].map(toLngLat);
+                        const roadFeatures=[
+                            {name:'G319 武隆段',color:'#00e5ff',coords:g319Coords},
+                            {name:'S203 省道',color:'#00b8d4',coords:s203Coords},
+                            {name:'G65 渝湘高速',color:'#40c4ff',coords:g65Coords}
+                        ];
+                        map.addSource('roads',{type:'geojson',data:{type:'FeatureCollection',features:roadFeatures.map(r=>({type:'Feature',geometry:{type:'LineString',coordinates:r.coords},properties:{name:r.name,color:r.color}}))}});
+                        // 道路发光底层（模糊宽线）
+                        map.addLayer({id:'roads-glow',type:'line',source:'roads',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':12,'line-opacity':0.18,'line-blur':5}});
+                        // 道路主线
+                        map.addLayer({id:'roads',type:'line',source:'roads',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':3.5,'line-opacity':0.9}});
+                        // 道路名称鼠标悬停提示
+                        const roadPopup=new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:10,className:'map-hover-popup'});
+                        map.on('mouseenter','roads',e=>{map.getCanvas().style.cursor='pointer';const f=e.features[0];roadPopup.setLngLat(e.lngLat).setHTML(`<div style="font-size:11px;color:#00e0ff;font-weight:bold">${f.properties.name}</div>`).addTo(map);});
+                        map.on('mouseleave','roads',()=>{map.getCanvas().style.cursor='';roadPopup.remove();});
+                        // ===== 灾害点虚线连接（监测网络覆盖） =====
+                        if(markersData.length>1){
+                            const connCoords=markersData.map(m=>toLngLat(m.coord));
+                            map.addSource('network',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:connCoords},properties:{}}});
+                            map.addLayer({id:'network',type:'line',source:'network',paint:{'line-color':'#00c8ff','line-width':1.5,'line-opacity':0.4,'line-dasharray':[2,1.5]}});
+                            // 监测网络中点标注
+                            if(connCoords.length>=2){
+                                const mid=[(connCoords[0][0]+connCoords[1][0])/2,(connCoords[0][1]+connCoords[1][1])/2];
+                                const netEl=document.createElement('div');netEl.style.cssText='color:#00c8ff;font-size:9px;white-space:nowrap;background:rgba(6,30,60,.8);padding:1px 5px;border-radius:2px;border:1px solid rgba(0,200,255,.4);pointer-events:none';netEl.textContent='🔗 监测网络';
+                                new maplibregl.Marker(netEl).setLngLat(mid).addTo(map);
+                            }
+                        }
+                        // ===== 灾害标记点（HTML Marker + Popup + Hover） =====
+                        markersData.forEach(m=>{
+                            const lngLat=toLngLat(m.coord);
+                            const color=m.type==='flood'?'#3b82f6':m.type==='landslide'?'#f97316':'#8b5cf6';
+                            const el=document.createElement('div');
+                            el.style.cssText=`width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 10px ${color},0 0 4px #fff;cursor:pointer;`;
+                            // 外圈脉冲动画（高风险点）
+                            if(m.riskIndex>=80){const ring=document.createElement('div');ring.style.cssText=`position:absolute;top:-8px;left:-8px;width:30px;height:30px;border-radius:50%;border:2px solid ${color};opacity:0.6;animation:pulseRing 2s ease-out infinite`;el.style.position='relative';el.appendChild(ring);}
+                            const uid=`canvas_${containerId}_${m.name.replace(/\s/g,'')}_${Date.now()}_${Math.random()}`;
+                            const popup=new maplibregl.Popup({maxWidth:'340px',closeButton:true,offset:20}).setHTML(buildPopupContent(m,uid));
+                            const marker=new maplibregl.Marker(el,{anchor:'center'}).setLngLat(lngLat).setPopup(popup).addTo(map);
+                            // hover 提示卡片
+                            const riskColor=m.riskIndex>=80?'#ef4444':m.riskIndex>=60?'#f97316':'#3b82f6';const riskLevel=m.riskIndex>=80?'高风险':m.riskIndex>=60?'中风险':'低风险';
+                            const hoverPopup=new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:20,className:'map-hover-popup',maxWidth:'260px'});
+                            let hoverTimer=null;
+                            el.addEventListener('mouseenter',()=>{hoverTimer=setTimeout(()=>{hoverPopup.setLngLat(lngLat).setHTML(`<div class="map-hover-card"><div class="map-hover-card-title">${m.name}</div><div class="map-hover-card-row"><span class="map-hover-card-label">风险指数</span><span class="map-hover-card-value" style="color:${riskColor}">${m.riskIndex} · ${riskLevel}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">当前状态</span><span class="map-hover-card-value">${m.currentPhase}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">建议措施</span><span style="color:#94a3b8;font-size:9px">${m.suggestion.substring(0,20)}...</span></div></div>`).addTo(map);},150);});
+                            el.addEventListener('mouseleave',()=>{if(hoverTimer)clearTimeout(hoverTimer);setTimeout(()=>hoverPopup.remove(),100);});
+                            // 弹窗打开后绑定 canvas 绘制和按钮事件
+                            popup.on('open',()=>{setTimeout(()=>{const c=document.getElementById(uid);if(c){c.width=280;c.height=90;drawSceneImage(m.type,uid);}const ab=document.getElementById(`btn_action_${uid}`);if(ab)ab.onclick=(e)=>{e.stopPropagation();showToast(`✅ 已启动${m.name}处置方案：${m.suggestion}`);};const sb=document.getElementById(`btn_snapshot_${uid}`);if(sb)sb.onclick=(e)=>{e.stopPropagation();showToast(`📸 现场快照已导出 (${m.name})`);};},50);});
+                        });
+                    });
+                    window.mapCache=window.mapCache||{};window.mapCache[containerId]=map;setTimeout(()=>map.resize(),200);return map;
                 };
                 const getDisasterMarkers=()=>[
                     {name:'道路积水·武隆隧道口',coord:[29.33,107.75],type:'flood',riskIndex:86,road:'G319 武隆段 K123+500',currentPhase:'现场处置',suggestion:'优先执行封控分流与现场广播，同步核查排水/清障资源是否已绑定到当前点位'},
@@ -1157,7 +1185,7 @@
                 watch(currentTab,()=>{nextTick(()=>{initAllMaps();if(currentTab.value==='hall')initDashboardCharts();if(['flood','slide','subsidence'].includes(currentTab.value))initScenarioCharts(currentTab.value);if(currentTab.value==='eval')initEvalCharts();if(currentTab.value==='user')initUserCharts();});});
                 const handleResize=()=>{
                     [scenarioRadar,scenarioBar,fullRadar,largeChart,resourceChart,evalRadar,evalBar,timelineChart,summaryRadar,scoreTrendChart,dimensionRadar,dimensionBar,disasterPie,equipDonut,teamDonut,window._trendChart].forEach(ch=>{if(ch&&ch.resize)ch.resize();});
-                    Object.values(window.mapCache||{}).forEach(m=>m?.invalidateSize());
+                    Object.values(window.mapCache||{}).forEach(m=>{if(m&&m.resize)m.resize();});
                 };
 
                 // ========== 后端 API 获取 ==========
@@ -1222,14 +1250,11 @@
                             eqs.forEach(eq => {
                                 if (!eq.lat || !eq.lon) return;
                                 const color = eq.magnitude >= 3 ? '#ef4444' : eq.magnitude >= 2 ? '#f97316' : '#eab308';
-                                const icon = L.divIcon({
-                                    className: '',
-                                    html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px ${color};opacity:0.85;cursor:pointer" title="M${eq.magnitude} ${eq.location}"></div>`,
-                                    iconSize: [12, 12]
-                                });
-                                L.marker([eq.lat, eq.lon], { icon })
-                                    .addTo(map)
-                                    .bindPopup(`<div style="color:#fff;font-size:11px"><b>🌍 地震活动</b><br>M${eq.magnitude} | 深度${eq.depth}km<br>${eq.location}<br>时间：${eq.time}</div>`);
+                                const el=document.createElement('div');
+                                el.style.cssText=`width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px ${color};opacity:0.85;cursor:pointer`;
+                                el.title=`M${eq.magnitude} ${eq.location}`;
+                                const popup=new maplibregl.Popup({offset:15}).setHTML(`<div style="color:#fff;font-size:11px"><b>🌍 地震活动</b><br>M${eq.magnitude} | 深度${eq.depth}km<br>${eq.location}<br>时间：${eq.time}</div>`);
+                                new maplibregl.Marker(el).setLngLat([eq.lon,eq.lat]).setPopup(popup).addTo(map);
                             });
                             if (eqs.length) showToast(`🌍 加载了 ${eqs.length} 条地震活动记录`);
                         }
