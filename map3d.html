@@ -149,8 +149,8 @@ function initScene(){
   scene.fog=new THREE.Fog(0x030810,2200,9000);
 
   camera=new THREE.PerspectiveCamera(62,W/H,0.5,12000);
-  camera.position.set(0,320,2200);
-  camera.lookAt(0,80,-800);
+  camera.position.set(120,95,800);
+  camera.lookAt(0,40,-400);
 
   var cv=document.getElementById('cv');
   renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
@@ -159,13 +159,13 @@ function initScene(){
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=0.9;
+  renderer.toneMappingExposure=1.6;
 
   controls=new THREE.OrbitControls(camera,cv);
   controls.enableDamping=true;controls.dampingFactor=0.05;
   controls.maxPolarAngle=Math.PI*0.48;
-  controls.minDistance=80;controls.maxDistance=4000;
-  controls.target.set(0,80,-400);
+  controls.minDistance=80;controls.maxDistance=3000;
+  controls.target.set(0,40,-200);
 
   // 深夜环境光（稍亮以看清地形）
   scene.add(new THREE.AmbientLight(0x0a1828,2.2));
