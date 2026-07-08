@@ -1070,27 +1070,29 @@
                     else if(type==='landslide'){ctx.fillStyle='#4a5b6e';ctx.fillRect(0,0,w,h*0.5);ctx.fillStyle='#78350f';for(let i=0;i<30;i++){ctx.beginPath();ctx.arc(w*0.3+Math.random()*w*0.5,h*0.5+Math.random()*20,3+Math.random()*5,0,2*Math.PI);ctx.fill();}ctx.fillStyle='#f97316';ctx.font='bold 12px "PingFang SC"';ctx.fillText('滑坡体 约3000m³',w*0.35,h*0.8);ctx.fillText('半幅阻断·紧急清障',w*0.35,h*0.9);}
                     else{ctx.fillStyle='#475569';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1e293b';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.2,h*0.15,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#0f172a';ctx.beginPath();ctx.ellipse(w*0.5,h*0.6,w*0.15,h*0.1,0,0,2*Math.PI);ctx.fill();ctx.fillStyle='#ef4444';ctx.font='bold 12px "PingFang SC"';ctx.fillText('⚠️ 路面塌陷',w*0.35,h*0.82);}
                 };
-                // Esri高清卫星影像 + 透明地名标注层 + AWS地形高程
+                // 高德卫星影像(国内稳定可用) + AWS地形高程
                 const terrainTile='https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png';
-                const toLngLat=c=>[c[1],c[0]]; // [lat,lng]->[lng,lat] WGS84
+                // WGS84->GCJ02（高德底图为火星坐标）
+                const wgs2gcj=(lat,lng)=>{const PI=3.14159265358979324,a=6378245.0,ee=0.00669342162296594323;const tL=(x,y)=>{let r=-100+2*x+3*y+0.2*y*y+0.1*x*y+0.2*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*PI)+20*Math.sin(2*x*PI))*2/3;r+=(20*Math.sin(y*PI)+40*Math.sin(y/3*PI))*2/3;r+=(160*Math.sin(y/12*PI)+320*Math.sin(y*PI/30))*2/3;return r;};const tG=(x,y)=>{let r=300+x+2*y+0.1*x*x+0.1*x*y+0.1*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*PI)+20*Math.sin(2*x*PI))*2/3;r+=(20*Math.sin(x*PI)+40*Math.sin(x/3*PI))*2/3;r+=(150*Math.sin(x/12*PI)+300*Math.sin(x/30*PI))*2/3;return r;};let dLat=tL(lng-105,lat-35),dLng=tG(lng-105,lat-35);const rL=lat/180*PI;let m=Math.sin(rL);m=1-ee*m*m;const sm=Math.sqrt(m);dLat=dLat*180/((a*(1-ee))/(m*sm)*PI);dLng=dLng*180/(a/sm*Math.cos(rL)*PI);return[lat+dLat,lng+dLng];};
+                const toLngLat=c=>{const[gl,gn]=wgs2gcj(c[0],c[1]);return[gn,gl];};
                 const initMap=(containerId,markersData)=>{
                     const container=document.getElementById(containerId);if(!container)return;
                     if(window.mapCache&&window.mapCache[containerId])window.mapCache[containerId].remove();
-                    // MapLibre 3D 地形地图：Esri高清卫星 + 透明地名标注 + 地形高程 + 倾斜视角
+                    // MapLibre 3D 地形地图：高德卫星(国内稳定) + 地形高程 + 倾斜视角
+                    const cGCJ=wgs2gcj(29.35,107.77);
                     const map=new maplibregl.Map({
                         container:containerId,
                         style:{
                             version:8,
                             sources:{
-                                satellite:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:20},
-                                labels:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:18},
+                                satellite:{type:'raster',tiles:['https://webst0.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst1.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst2.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}','https://webst3.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}'],tileSize:256,maxzoom:20},
                                 terrain:{type:'raster-dem',tiles:[terrainTile],encoding:'terrarium',tileSize:256,maxzoom:14}
                             },
-                            layers:[{id:'satellite',type:'raster',source:'satellite'},{id:'labels',type:'raster',source:'labels',paint:{'raster-opacity':0.9}}],
+                            layers:[{id:'satellite',type:'raster',source:'satellite'}],
                             sky:{'sky-color':'#0a1628','sky-horizon-blend':0.5,'horizon-color':'#0d2137','horizon-fog-blend':0.6,'fog-color':'#0a1628','fog-ground-blend':0.6},
                             light:{anchor:'viewport',color:'#ffffff',intensity:0.6}
                         },
-                        center:[107.77,29.35],
+                        center:[cGCJ[1],cGCJ[0]],
                         zoom:13,
                         pitch:58,
                         bearing:-25,
@@ -1256,7 +1258,7 @@
                                 el.style.cssText=`width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px ${color};opacity:0.85;cursor:pointer`;
                                 el.title=`M${eq.magnitude} ${eq.location}`;
                                 const popup=new maplibregl.Popup({offset:15}).setHTML(`<div style="color:#fff;font-size:11px"><b>🌍 地震活动</b><br>M${eq.magnitude} | 深度${eq.depth}km<br>${eq.location}<br>时间：${eq.time}</div>`);
-                                new maplibregl.Marker(el).setLngLat([eq.lon,eq.lat]).setPopup(popup).addTo(map);
+                                const eqC=wgs2gcj(eq.lat,eq.lon);new maplibregl.Marker(el).setLngLat([eqC[1],eqC[0]]).setPopup(popup).addTo(map);
                             });
                             if (eqs.length) showToast(`🌍 加载了 ${eqs.length} 条地震活动记录`);
                         }
