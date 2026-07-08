@@ -7,539 +7,407 @@
 <title>深夜盘山公路 · 重庆武隆数字孪生</title>
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#000}
 #cv{display:block;position:fixed;inset:0}
-/* HUD 覆盖层 */
-#hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:flex;flex-direction:column;justify-content:space-between}
-#hud-top{padding:18px 24px;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,transparent 100%)}
-#hud-top h1{font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:600;color:rgba(200,230,255,.92);letter-spacing:2px;text-shadow:0 0 18px rgba(100,180,255,.6)}
-#hud-top .sub{font-size:10px;color:rgba(120,180,220,.6);margin-top:3px;letter-spacing:1px}
-/* 聊天 UI */
-#chat-panel{position:fixed;right:20px;bottom:90px;width:218px;display:flex;flex-direction:column;gap:8px;z-index:15;pointer-events:none;max-height:60vh;overflow:hidden}
-.bubble{background:rgba(18,26,38,.72);backdrop-filter:blur(10px);border:1px solid rgba(80,140,200,.18);border-radius:18px;padding:10px 14px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:11.5px;line-height:1.65;color:rgba(210,235,255,.88);text-shadow:0 0 8px rgba(120,200,255,.35);box-shadow:0 2px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04)}
-.bubble.right{align-self:flex-end;background:rgba(20,40,65,.68);border-color:rgba(60,120,200,.22)}
-.bubble .meta{font-size:9px;color:rgba(100,160,210,.5);margin-bottom:4px}
-.bubble .meta.r{text-align:right}
-.bubble-time{font-size:8.5px;color:rgba(80,130,180,.4);margin-top:4px;display:block}
-/* 底部状态栏 */
-#hud-bot{padding:14px 24px 18px;background:linear-gradient(0deg,rgba(0,0,0,.55) 0%,transparent 100%);display:flex;align-items:flex-end;justify-content:space-between}
-.stat-item{font-family:"PingFang SC","Microsoft YaHei",sans-serif;text-align:center}
-.stat-val{font-size:18px;font-weight:700;color:rgba(160,210,255,.9);text-shadow:0 0 10px rgba(80,160,255,.5);display:block}
-.stat-lab{font-size:9px;color:rgba(100,150,190,.55);margin-top:1px;letter-spacing:1px;display:block}
-#back-btn{position:fixed;top:18px;right:20px;z-index:20;pointer-events:auto;padding:7px 16px;background:rgba(12,24,40,.8);border:1px solid rgba(60,120,200,.3);border-radius:20px;color:rgba(160,210,255,.8);font-size:11px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;text-decoration:none}
-#back-btn:hover{background:rgba(20,50,90,.9);border-color:rgba(80,160,255,.5);color:#fff}
-#loading{position:fixed;inset:0;background:#000;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
-#loading .sp{width:36px;height:36px;border:2px solid rgba(80,140,200,.2);border-top-color:rgba(80,160,255,.8);border-radius:50%;animation:spin 1s linear infinite}
+
+/* ── 左侧聊天面板 ── */
+#chat{position:fixed;left:18px;top:50%;transform:translateY(-50%);width:192px;
+  display:flex;flex-direction:column;gap:8px;z-index:15;pointer-events:none}
+.bbl{background:rgba(8,14,26,.74);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(60,110,175,.17);border-radius:16px;padding:9px 13px;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:10.5px;
+  line-height:1.72;color:rgba(215,232,255,.9);
+  text-shadow:0 0 12px rgba(120,195,255,.28);
+  box-shadow:0 2px 18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.03)}
+.bbl.me{background:rgba(12,26,52,.72);border-color:rgba(45,95,175,.22);margin-left:18px}
+.bm{font-size:8.8px;color:rgba(80,145,210,.5);margin-bottom:3px}
+.bm.r{text-align:right}
+.bt{display:block;font-size:8px;color:rgba(60,110,170,.38);margin-top:3px}
+
+/* ── 顶部标题 ── */
+#top{position:fixed;top:0;left:0;right:0;padding:14px 22px 32px;
+  background:linear-gradient(180deg,rgba(0,0,0,.62) 0%,transparent 100%);
+  pointer-events:none;z-index:10}
+#top h1{font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:15.5px;
+  font-weight:600;color:rgba(195,225,255,.93);letter-spacing:2px;
+  text-shadow:0 0 22px rgba(70,155,255,.55)}
+#top .sub{font-size:9px;color:rgba(95,155,210,.52);margin-top:2px;letter-spacing:1px}
+
+/* ── 底部状态 ── */
+#bot{position:fixed;bottom:0;left:0;right:0;padding:22px 26px 17px;
+  background:linear-gradient(0deg,rgba(0,0,0,.68) 0%,transparent 100%);
+  display:flex;align-items:flex-end;gap:30px;pointer-events:none;z-index:10}
+.sv{display:block;font-family:"PingFang SC",sans-serif;font-size:19px;font-weight:700;
+  color:rgba(150,210,255,.93);text-shadow:0 0 14px rgba(70,155,255,.5)}
+.sl{display:block;font-size:8.5px;color:rgba(85,135,180,.48);margin-top:2px;letter-spacing:1px}
+
+/* ── 返回按钮 ── */
+#bk{position:fixed;top:15px;right:18px;z-index:20;padding:7px 15px;
+  background:rgba(6,14,28,.84);border:1px solid rgba(55,105,175,.28);border-radius:20px;
+  color:rgba(145,205,255,.82);font-family:"PingFang SC",sans-serif;font-size:11px;
+  cursor:pointer;text-decoration:none;backdrop-filter:blur(8px);transition:all .2s}
+#bk:hover{background:rgba(18,48,100,.92);color:#fff}
+
+/* ── 加载 ── */
+#ld{position:fixed;inset:0;background:#000;z-index:100;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.sp{width:32px;height:32px;border:2px solid rgba(50,110,200,.18);
+  border-top-color:rgba(80,170,255,.88);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#loading p{font-family:"PingFang SC",sans-serif;font-size:12px;color:rgba(100,160,200,.6);letter-spacing:2px}
+.lp{font-family:"PingFang SC",sans-serif;font-size:11px;color:rgba(75,140,195,.58);letter-spacing:2px}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
-<div id="loading"><div class="sp"></div><p>深夜山区 · 场景加载中...</p></div>
+<div id="ld"><div class="sp"></div><p class="lp">深夜山区 · 场景构建中...</p></div>
 
-<div id="hud">
-  <div id="hud-top">
-    <h1>⚡ 重庆山区公路 · 应急数字孪生演练系统</h1>
-    <div class="sub">S203 K124+300 滑坡处置现场 · 深夜巡查模式 · 二级响应持续中</div>
+<!-- 左侧聊天 UI -->
+<div id="chat">
+  <div class="bbl">
+    <div class="bm">调度中心 · 王雪梅</div>
+    K124+300 位移速率降至 0.8mm/h，雨势明显减弱，继续加密监测。
+    <span class="bt">23:31</span>
   </div>
-  <div id="hud-bot">
-    <div class="stat-item"><span class="stat-val">23:47</span><span class="stat-lab">当前时刻</span></div>
-    <div class="stat-item"><span class="stat-val" style="color:rgba(255,140,100,.85)">二级</span><span class="stat-lab">响应等级</span></div>
-    <div class="stat-item"><span class="stat-val">892<span style="font-size:11px;font-weight:400">m</span></span><span class="stat-lab">现场海拔</span></div>
-    <div class="stat-item"><span class="stat-val">78<span style="font-size:11px;font-weight:400">%</span></span><span class="stat-lab">处置进度</span></div>
-    <div class="stat-item"><span class="stat-val">12℃</span><span class="stat-lab">现场温度</span></div>
+  <div class="bbl me">
+    <div class="bm r">抢通一队 · 王建军</div>
+    收到，已清运约 1200m³，预计 01:00 完成半幅抢通。
+    <span class="bt">23:34</span>
+  </div>
+  <div class="bbl">
+    <div class="bm">地质专家 · 周文渊</div>
+    边坡稳定性：中等风险，建议警戒距离 30m 以上。
+    <span class="bt">23:38</span>
+  </div>
+  <div class="bbl me">
+    <div class="bm r">值班长 · 李卫东</div>
+    无人机复查起飞，三维扫描上传中，10 分钟后可用。
+    <span class="bt">23:41</span>
+  </div>
+  <div class="bbl">
+    <div class="bm">气象站</div>
+    预计 02:00 后转小雨，累计雨量 82mm。
+    <span class="bt">23:45</span>
   </div>
 </div>
 
-<!-- 深色聊天气泡 UI -->
-<div id="chat-panel">
-  <div class="bubble">
-    <div class="meta">调度中心 · 王雪梅</div>
-    K124+300 位移速率已降至 0.8mm/h，雨势减弱，继续加密监测。
-    <span class="bubble-time">23:31</span>
-  </div>
-  <div class="bubble right">
-    <div class="meta r">抢通一队 · 王建军</div>
-    收到，挖掘机作业面已清理约 1200m³，预计 01:00 前完成半幅。
-    <span class="bubble-time">23:34</span>
-  </div>
-  <div class="bubble">
-    <div class="meta">地质专家 · 周文渊</div>
-    当前边坡稳定性评估：中等风险。建议保持警戒距离 30m 以上。
-    <span class="bubble-time">23:38</span>
-  </div>
-  <div class="bubble right">
-    <div class="meta r">值班长 · 李卫东</div>
-    无人机已起飞复查，高程扫描数据上传中，三维模型 10 分钟后可用。
-    <span class="bubble-time">23:41</span>
-  </div>
-  <div class="bubble">
-    <div class="meta">气象站</div>
-    武隆区降雨强度减弱，预计 02:00 后转小雨，累计雨量 82mm。
-    <span class="bubble-time">23:45</span>
-  </div>
+<div id="top">
+  <h1>⚡ 重庆山区公路 · 应急数字孪生演练系统</h1>
+  <div class="sub">S203 K124+300 · 深夜巡查模式 · 二级响应持续中</div>
 </div>
-
-<a id="back-btn" href="1.html">← 返回主系统</a>
+<div id="bot">
+  <div><span class="sv">23:47</span><span class="sl">当前时刻</span></div>
+  <div><span class="sv" style="color:rgba(255,138,88,.94)">二级</span><span class="sl">响应等级</span></div>
+  <div><span class="sv">892<small style="font-size:11px;font-weight:400">m</small></span><span class="sl">现场海拔</span></div>
+  <div><span class="sv">78<small style="font-size:11px;font-weight:400">%</small></span><span class="sl">处置进度</span></div>
+  <div><span class="sv">12℃</span><span class="sl">现场气温</span></div>
+</div>
+<a id="bk" href="1.html">← 返回主系统</a>
 
 <script>
-// ============================================================
-//  深夜盘山公路 3D 氛围场景
-// ============================================================
-var W=window.innerWidth,H=window.innerHeight;
-var scene,camera,renderer,controls;
-var clock=new THREE.Clock();
-var fogUniforms,roadLights=[];
+// ================================================================
+//  深夜盘山公路 · 3D电影氛围场景
+//  Three.js 0.128 · Bloom辉光 · SpotLight光锥 · 双层湿路面
+// ================================================================
+var W=innerWidth,H=innerHeight;
+var scene,camera,renderer,controls,composer,clock=new THREE.Clock();
 
-// ---------- 噪声 ----------
-function hash(x,y){var h=x*374761393+y*668265263;h=(h^(h>>13))*1274126177;return((h^(h>>16))>>>0)/4294967295}
-function sn(x,y){var ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,a=hash(ix,iy),b=hash(ix+1,iy),c=hash(ix,iy+1),d=hash(ix+1,iy+1),ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);return a*(1-ux)*(1-uy)+b*ux*(1-uy)+c*(1-ux)*uy+d*ux*uy}
+// ── 噪声 ─────────────────────────────────────────────────────────
+function h2(x,y){var h=x*374761393+y*668265263;h=(h^(h>>13))*1274126177;return((h^(h>>16))>>>0)/4294967295}
+function sn(x,y){var ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,a=h2(ix,iy),b=h2(ix+1,iy),c=h2(ix,iy+1),d=h2(ix+1,iy+1),ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);return a*(1-ux)*(1-uy)+b*ux*(1-uy)+c*(1-ux)*uy+d*ux*uy}
 function fn(x,y,o){var v=0,a=1,f=1,m=0;for(var i=0;i<o;i++){v+=sn(x*f,y*f)*a;m+=a;a*=.5;f*=2}return v/m}
 
-// ---------- 地形高度 ----------
-var RPATH=[];  // 公路中心线
-function makeRoadPath(){
-  // 蜿蜒盘山路：Z轴从 -3000 到 3000，X轴正弦蛇形
-  var pts=[];
-  for(var i=0;i<=60;i++){
-    var t=i/60;
-    var z=-3000+t*6000;
-    var x = Math.sin(t*Math.PI*3.5)*420         // 主蜿蜒
-            +Math.sin(t*Math.PI*7)*120            // 小弯
-            +Math.cos(t*Math.PI*1.8)*180;         // 大弧
-    var y = t*280                                 // 持续爬坡
-            +Math.sin(t*Math.PI*2)*40             // 起伏
-            +fn(x*0.002,z*0.002,3)*60;            // 地形噪声
-    pts.push(new THREE.Vector3(x,y,z));
-  }
-  RPATH=pts;
-  return new THREE.CatmullRomCurve3(pts,false,'catmullrom',0.5);
-}
-function getTerrainH(x,z){
-  var h=fn(x*0.00035,z*0.00035,6)*360
-       +fn(x*0.0012,z*0.0012,3)*90
-       +fn(x*0.005,z*0.005,2)*22;
-  h-=Math.exp(-((x*x+z*z)/18000000))*20;
-  return Math.max(0,h);
+// ── 公路曲线（蜿蜒盘山） ──────────────────────────────────────────
+var RPTS=[
+  new THREE.Vector3( 15, 52, 950),
+  new THREE.Vector3(190, 60, 640),
+  new THREE.Vector3(230, 68, 360),
+  new THREE.Vector3(115, 83, 95),
+  new THREE.Vector3(-195,100,-215),
+  new THREE.Vector3(-295,116,-490),
+  new THREE.Vector3(-210,131,-775),
+  new THREE.Vector3(  55,147,-1070),
+  new THREE.Vector3( 290,163,-1370),
+  new THREE.Vector3( 375,178,-1680),
+  new THREE.Vector3( 205,192,-1980),
+  new THREE.Vector3( -25,204,-2280),
+  new THREE.Vector3(-185,215,-2565),
+  new THREE.Vector3( -75,224,-2870),
+  new THREE.Vector3(  45,230,-3150),
+];
+var RC=new THREE.CatmullRomCurve3(RPTS,false,'catmullrom',0.5);
+
+// ── 地形（预计算路点避免重复） ────────────────────────────────────
+var _rp=null;
+function terrH(x,z){
+  if(!_rp)_rp=RC.getPoints(90);
+  var base=fn(x*.00034,z*.00034,5)*370+fn(x*.0013,z*.0013,3)*75+fn(x*.005,z*.005,2)*18;
+  var md=9999;
+  for(var i=0;i<_rp.length;i++){var dx=x-_rp[i].x,dz=z-_rp[i].z;var d=dx*dx+dz*dz;if(d<md)md=d}
+  return Math.max(12,base-Math.exp(-md/1300)*45);
 }
 
-// ---------- 地形颜色（暗夜调色） ----------
-function terrainColor(h,slope,wet){
-  var n=fn(h*.015,slope*8,2);
-  var r,g,b;
-  // 深夜：暗绿山林 + 深岩石 + 偶尔路面反光
-  if(h<12){r=0.04+n*.02;g=0.06+n*.02;b=0.09+n*.03} // 谷底暗水
-  else if(h<40){r=0.07+n*.04;g=0.09+n*.04;b=0.10+n*.04} // 湿土（青灰）
-  else if(h<120){r=0.06+n*.04;g=0.09+n*.05;b=0.10+n*.05} // 深夜山林（冷青灰绿）
-  else if(h<220){r=0.09+n*.05;g=0.10+n*.05;b=0.12+n*.05} // 岩石（偏蓝灰）
-  else{r=0.13+n*.06;g=0.14+n*.06;b=0.17+n*.06} // 山顶（冷灰）
-  if(slope>0.55){var s=(slope-0.55)*1.8;r=r*(1-s)+0.11*s;g=g*(1-s)+0.10*s;b=b*(1-s)+0.12*s}
-  // 雨后湿润 + 冷蓝色调偏移
-  if(wet){r=Math.max(0,r-0.005);b=Math.min(1,b+0.025)}
-  return{r:Math.min(1,r),g:Math.min(1,g),b:Math.min(1,b)};
-}
-
-// ---------- 场景初始化 ----------
+// ── 场景 + 渲染器 ─────────────────────────────────────────────────
 function initScene(){
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x020408);
-  scene.fog=new THREE.Fog(0x030810,2200,9000);
+  scene.background=new THREE.Color(0x010407);
+  scene.fog=new THREE.FogExp2(0x010508,0.00025);
 
-  camera=new THREE.PerspectiveCamera(62,W/H,0.5,12000);
-  camera.position.set(180,55,300);
-  camera.lookAt(0,30,-100);
+  camera=new THREE.PerspectiveCamera(56,W/H,0.5,10000);
+  camera.position.set(310,88,530);
+  camera.lookAt(0,44,-160);
 
   var cv=document.getElementById('cv');
   renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
-  renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.6;
+  renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.88;
 
   controls=new THREE.OrbitControls(camera,cv);
   controls.enableDamping=true;controls.dampingFactor=0.05;
-  controls.maxPolarAngle=Math.PI*0.48;
-  controls.minDistance=80;controls.maxDistance=3000;
-  controls.target.set(0,30,-100);
+  controls.maxPolarAngle=Math.PI*.46;controls.minDistance=50;controls.maxDistance=2400;
+  controls.target.set(0,44,-160);
 
-  // 深夜环境光（稍亮以看清地形）
-  scene.add(new THREE.AmbientLight(0x0a1828,2.2));
-  scene.add(new THREE.HemisphereLight(0x1a3050,0x060c08,1.0));
-
-  // 月光（低角度平行光，冷蓝）
-  var moon=new THREE.DirectionalLight(0x8ab8e0,0.85);
-  moon.position.set(-2000,1800,-1000);
-  moon.castShadow=true;
-  moon.shadow.mapSize.set(1024,1024);
-  moon.shadow.camera.left=-3000;moon.shadow.camera.right=3000;
-  moon.shadow.camera.top=3000;moon.shadow.camera.bottom=-3000;
-  moon.shadow.camera.far=8000;moon.shadow.bias=-0.001;
-  scene.add(moon);
-
-  // 体积雾粒子（山间薄雾）
-  buildFogParticles();
-  // 月亮光晓
-  buildMoonGlow();
-  // 地形
-  buildTerrain();
-  // 公路
-  var roadCurve=makeRoadPath();
-  buildRoad(roadCurve);
-  // 路灯
-  buildStreetLights(roadCurve);
-  // 山林树木
-  buildForest();
-  // 星空
-  buildStars();
-  // 远山轮廓
-  buildMountainSilhouette();
+  // 极暗夜间环境光
+  scene.add(new THREE.AmbientLight(0x03080e,1.1));
+  scene.add(new THREE.HemisphereLight(0x0a1826,0x040c06,0.42));
+  var moon=new THREE.DirectionalLight(0x6888b0,0.2);
+  moon.position.set(-600,900,-400);scene.add(moon);
 }
 
-// ---------- 地形 ----------
+// ── Bloom 后处理 ──────────────────────────────────────────────────
+function initBloom(){
+  composer=new THREE.EffectComposer(renderer);
+  composer.addPass(new THREE.RenderPass(scene,camera));
+  var bloom=new THREE.UnrealBloomPass(new THREE.Vector2(W,H),0.85,0.55,0.32);
+  composer.addPass(bloom);
+}
+
+// ── 天空球 ────────────────────────────────────────────────────────
+function buildSky(){
+  var sg=new THREE.SphereGeometry(7500,24,12);
+  var sm=new THREE.ShaderMaterial({side:THREE.BackSide,
+    vertexShader:'varying float vy;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vy=normalize(wp.xyz).y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'varying float vy;void main(){float t=clamp(vy,0.,1.);vec3 top=vec3(.008,.018,.04);vec3 mid=vec3(.012,.025,.055);vec3 c=mix(mid,top,pow(t,.5));gl_FragColor=vec4(c,1.);}',
+  });
+  scene.add(new THREE.Mesh(sg,sm));
+}
+
+// ── 星星 ─────────────────────────────────────────────────────────
+function buildStars(){
+  var N=3200,geo=new THREE.BufferGeometry(),p=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var th=Math.random()*Math.PI*2,ph=Math.acos(Math.random()),r=5500+Math.random()*2000;
+    p[i*3]=r*Math.sin(ph)*Math.cos(th);p[i*3+1]=Math.abs(r*Math.cos(ph))+280;p[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+  }
+  geo.setAttribute('position',new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xaabbd2,size:1.5,transparent:true,opacity:.72,sizeAttenuation:true,depthWrite:false})));
+}
+
+// ── 月亮 ─────────────────────────────────────────────────────────
+function buildMoon(){
+  var mp=new THREE.Vector3(-2700,2500,-4100);
+  [[55,0.62,0xccd8ee],[95,0.14,0x8ab0d8],[160,0.06,0x6090c0],[260,0.022,0x4070a0]].forEach(function(d){
+    var g=new THREE.CircleGeometry(d[0],32),m=new THREE.MeshBasicMaterial({color:d[2],transparent:true,opacity:d[1],depthWrite:false});
+    var mesh=new THREE.Mesh(g,m);mesh.position.copy(mp);mesh.lookAt(0,100,0);scene.add(mesh);
+  });
+  // 天边月光带
+  var lg=new THREE.PlaneGeometry(12000,160);
+  var lm=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
+    vertexShader:'varying vec2 uv2;void main(){uv2=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'varying vec2 uv2;void main(){float a=pow(1.-abs(uv2.y*2.-1.),2.8)*.13;gl_FragColor=vec4(.15,.35,.6,a);}'});
+  var lme=new THREE.Mesh(lg,lm);lme.position.set(-200,140,-4400);scene.add(lme);
+}
+
+// ── 地形 ─────────────────────────────────────────────────────────
 function buildTerrain(){
-  var SEG=280,SIZE=9000;
-  var geo=new THREE.PlaneGeometry(SIZE,SIZE,SEG,SEG);
+  var S=6200,SEG=200,geo=new THREE.PlaneGeometry(S,S,SEG,SEG);
   geo.rotateX(-Math.PI/2);
-  var pos=geo.attributes.position;
-  var cols=[];
+  var pos=geo.attributes.position,cols=new Float32Array(pos.count*3);
   for(var i=0;i<pos.count;i++){
-    var x=pos.getX(i),z=pos.getZ(i);
-    var h=getTerrainH(x,z);
+    var x=pos.getX(i),z=pos.getZ(i),h=terrH(x,z);
     pos.setY(i,h);
-    var hx=getTerrainH(x+20,z)-getTerrainH(x-20,z);
-    var hz=getTerrainH(x,z+20)-getTerrainH(x,z-20);
-    var sl=Math.min(1,Math.sqrt(hx*hx+hz*hz)/40);
-    var c=terrainColor(h,sl,true);
-    cols.push(c.r,c.g,c.b);
+    var hx=terrH(x+14,z)-terrH(x-14,z),hz=terrH(x,z+14)-terrH(x,z-14);
+    var sl=Math.min(1,Math.sqrt(hx*hx+hz*hz)/28);
+    var n=fn(x*.008,z*.008,2)*.5+.5,bh=Math.min(1,h/240);
+    // 深夜：极暗青蓝灰色调
+    cols[i*3]  =Math.min(.19,.034+bh*.055+sl*.038+n*.018);
+    cols[i*3+1]=Math.min(.18,.042+bh*.05+sl*.032+n*.016);
+    cols[i*3+2]=Math.min(.26,.056+bh*.085+sl*.048+n*.024);
   }
   geo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
   geo.computeVertexNormals();
-  var mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0.0});
-  var mesh=new THREE.Mesh(geo,mat);
-  mesh.receiveShadow=true;
-  scene.add(mesh);
+  var mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.97,metalness:0}));
+  mesh.receiveShadow=true;scene.add(mesh);
 }
 
-// ---------- 公路 ----------
-function buildRoad(curve){
-  // 路面（深灰湿沥青）
-  var roadGeo=new THREE.TubeGeometry(curve,500,5.5,8,false);
-  var roadMat=new THREE.MeshStandardMaterial({
-    color:0x141820,roughness:0.5,metalness:0.25,
-    emissive:0x030610,emissiveIntensity:0.5
-  });
-  var road=new THREE.Mesh(roadGeo,roadMat);
-  road.receiveShadow=true;
-  scene.add(road);
+// ── 公路 ─────────────────────────────────────────────────────────
+function buildRoad(){
+  // 底层：暗沥青
+  var rg=new THREE.TubeGeometry(RC,650,6.0,10,false);
+  var road=new THREE.Mesh(rg,new THREE.MeshStandardMaterial({
+    color:0x0c0f15,roughness:.6,metalness:.18,emissive:0x020508,emissiveIntensity:.4
+  }));
+  road.receiveShadow=true;scene.add(road);
 
-  // 中间虚线（黄色反光）
-  var dashGeo=new THREE.TubeGeometry(curve,500,0.35,4,false);
-  var dashMat=new THREE.MeshBasicMaterial({color:0x806030,transparent:true,opacity:0.5});
-  scene.add(new THREE.Mesh(dashGeo,dashMat));
+  // 上层：雨后湿润反光（蓝色镜面薄膜）
+  var wg=new THREE.TubeGeometry(RC,650,5.85,10,false);
+  scene.add(new THREE.Mesh(wg,new THREE.MeshStandardMaterial({
+    color:0x060e22,roughness:.03,metalness:.94,transparent:true,opacity:.48,
+    emissive:0x081840,emissiveIntensity:.95,depthWrite:false
+  })));
 
-  // 路面湿润反光（薄层蓝光叠加）
-  var reflGeo=new THREE.TubeGeometry(curve,500,5.4,8,false);
-  var reflMat=new THREE.MeshStandardMaterial({
-    color:0x0a1828,roughness:0.1,metalness:0.9,
-    transparent:true,opacity:0.35,
-    emissive:0x1040a0,emissiveIntensity:1.2
-  });
-  scene.add(new THREE.Mesh(reflGeo,reflMat));
+  // 中心虚线
+  var pts=RC.getPoints(900);
+  for(var i=0;i<pts.length-5;i+=10){
+    var seg=[];for(var j=0;j<5;j++)seg.push(pts[i+j].clone().add(new THREE.Vector3(0,.5,0)));
+    var dg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(seg),4,.28,3,false);
+    scene.add(new THREE.Mesh(dg,new THREE.MeshBasicMaterial({color:0x706028})));
+  }
 
-  // 护栏（白色反光条）
-  [-7,7].forEach(function(off){
-    var railPts=curve.getPoints(400).map(function(p){
-      var t=curve.getUtoTmapping(0,p);
-      var tan=curve.getTangent(t||0);
-      var right=new THREE.Vector3(-tan.z,0,tan.x).normalize();
-      return p.clone().add(right.multiplyScalar(off)).add(new THREE.Vector3(0,4,0));
+  // 双侧护栏
+  [-8,8].forEach(function(off){
+    var rpts=RC.getPoints(450).map(function(p,idx,arr){
+      var tan=idx<arr.length-1?arr[idx+1].clone().sub(p).normalize():arr[idx].clone().sub(arr[idx-1]).normalize();
+      var r=new THREE.Vector3(-tan.z,0,tan.x).normalize();
+      return p.clone().addScaledVector(r,off).add(new THREE.Vector3(0,5.8,0));
     });
-    var railCurve=new THREE.CatmullRomCurve3(railPts);
-    var rg=new THREE.TubeGeometry(railCurve,400,0.25,4,false);
-    var rm=new THREE.MeshStandardMaterial({color:0xc0d0e0,emissive:0x304060,emissiveIntensity:0.4,roughness:0.3,metalness:0.5});
-    scene.add(new THREE.Mesh(rg,rm));
+    var rc=new THREE.CatmullRomCurve3(rpts);
+    scene.add(new THREE.Mesh(new THREE.TubeGeometry(rc,450,.2,4,false),
+      new THREE.MeshStandardMaterial({color:0x7888a0,emissive:0x2c4060,emissiveIntensity:.4,roughness:.22,metalness:.75})));
   });
 }
 
-// ---------- 路灯 ----------
-function buildStreetLights(curve){
-  var count=28;
-  for(var i=0;i<count;i++){
-    var t=i/(count-1);
-    var pos=curve.getPoint(t);
-    var tan=curve.getTangent(t);
+// ── 路灯（SpotLight + 光锥 + 地面光圈） ──────────────────────────
+function buildLamps(){
+  var COUNT=24;
+  for(var i=0;i<COUNT;i++){
+    var t=i/(COUNT-1);
+    var cp=RC.getPoint(t),tan=RC.getTangent(t);
     var right=new THREE.Vector3(-tan.z,0,tan.x).normalize();
-
-    // 交替左右侧路灯
     var side=(i%2===0)?1:-1;
-    var lpos=pos.clone().add(right.multiplyScalar(side*8.5)).add(new THREE.Vector3(0,0.5,0));
+    var lp=cp.clone().addScaledVector(right,side*9).add(new THREE.Vector3(0,1,0));
 
     // 灯杆
-    var poleGeo=new THREE.CylinderGeometry(0.18,0.25,9,5);
-    var poleMat=new THREE.MeshStandardMaterial({color:0x202832,roughness:0.7});
-    var pole=new THREE.Mesh(poleGeo,poleMat);
-    pole.position.copy(lpos);
-    pole.position.y+=4.5;
-    scene.add(pole);
+    var pole=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,10.5,6),
+      new THREE.MeshStandardMaterial({color:0x151c28,roughness:.72}));
+    pole.position.set(lp.x,lp.y+5.25,lp.z);scene.add(pole);
 
-    // 灯头
-    var headGeo=new THREE.SphereGeometry(0.6,8,8);
-    var headMat=new THREE.MeshStandardMaterial({
-      color:0xb0d0ff,emissive:0x80b8ff,emissiveIntensity:3,
-      roughness:0.2,metalness:0.3
-    });
-    var head=new THREE.Mesh(headGeo,headMat);
-    head.position.copy(lpos);
-    head.position.y+=9.5;
-    scene.add(head);
+    // 灯头（高发光强度，Bloom 捕捉）
+    var head=new THREE.Mesh(new THREE.SphereGeometry(.52,8,8),
+      new THREE.MeshStandardMaterial({color:0xd8ecff,emissive:0xa0d0ff,emissiveIntensity:6,roughness:.08,metalness:.15}));
+    head.position.set(lp.x,lp.y+11.2,lp.z);scene.add(head);
 
-    // 点光源（冷蓝路灯光晕）
-    var pl=new THREE.PointLight(0x70a8f0,3.5,80,2);
+    // 光锥（Additive 叠加半透明锥体）
+    var cg=new THREE.ConeGeometry(10,24,12,1,true);cg.translate(0,-12,0);
+    var cone=new THREE.Mesh(cg,new THREE.ShaderMaterial({
+      transparent:true,depthWrite:false,side:THREE.FrontSide,
+      blending:THREE.AdditiveBlending,
+      vertexShader:'varying float vy;void main(){vy=(position.y+12.)/24.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+      fragmentShader:'varying float vy;void main(){float a=pow(1.-vy,2.0)*.062;gl_FragColor=vec4(.5,.72,1.,a);}'
+    }));
+    cone.position.copy(head.position);scene.add(cone);
+
+    // 地面光斑
+    var gg=new THREE.CircleGeometry(12,16);gg.rotateX(-Math.PI/2);
+    var gm=new THREE.Mesh(gg,new THREE.MeshBasicMaterial({color:0x2848a0,transparent:true,opacity:.18,depthWrite:false}));
+    gm.position.set(lp.x,lp.y+.4,lp.z);scene.add(gm);
+
+    // PointLight（冷蓝，无阴影优先性能；每5盏投一次影）
+    var pl=new THREE.PointLight(0x85baee,3.4,100,1.8);
     pl.position.copy(head.position);
-    pl.castShadow=(i%4===0);  // 每隔4盏才投影（性能）
-    if(pl.castShadow){pl.shadow.mapSize.set(256,256);pl.shadow.bias=-0.002}
+    if(i%5===0){pl.castShadow=true;pl.shadow.mapSize.set(256,256);pl.shadow.bias=-.003;}
     scene.add(pl);
-    roadLights.push({light:pl,baseY:head.position.y,t:t,phase:Math.random()*Math.PI*2});
-
-    // 地面光圈（路灯照地）
-    var glowGeo=new THREE.CircleGeometry(12,16);
-    glowGeo.rotateX(-Math.PI/2);
-    var glowMat=new THREE.MeshBasicMaterial({
-      color:0x304870,transparent:true,opacity:0.18,depthWrite:false
-    });
-    var glow=new THREE.Mesh(glowGeo,glowMat);
-    glow.position.copy(lpos);
-    glow.position.y+=0.3;
-    scene.add(glow);
   }
 }
 
-// ---------- 薄雾粒子 ----------
-function buildFogParticles(){
-  var count=2200;
-  var geo=new THREE.BufferGeometry();
-  var positions=new Float32Array(count*3);
-  for(var i=0;i<count;i++){
-    positions[i*3]=(Math.random()-0.5)*5000;
-    positions[i*3+1]=Math.random()*180+5;     // 贴地薄雾层
-    positions[i*3+2]=(Math.random()-0.5)*6000;
-  }
-  geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  var mat=new THREE.PointsMaterial({
-    color:0x2a4060,size:18,transparent:true,opacity:0.28,
-    sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending
-  });
-  scene.add(new THREE.Points(geo,mat));
-
-  // 第二层更厚雾（贴谷底）
-  var count2=800;
-  var geo2=new THREE.BufferGeometry();
-  var p2=new Float32Array(count2*3);
-  for(var j=0;j<count2;j++){
-    p2[j*3]=(Math.random()-0.5)*3000;
-    p2[j*3+1]=Math.random()*60+0;
-    p2[j*3+2]=(Math.random()-0.5)*4000+500;
-  }
-  geo2.setAttribute('position',new THREE.BufferAttribute(p2,3));
-  var mat2=new THREE.PointsMaterial({
-    color:0x1a3050,size:40,transparent:true,opacity:0.18,
-    sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending
-  });
-  scene.add(new THREE.Points(geo2,mat2));
-}
-
-// ---------- 月亮光晓 ----------
-function buildMoonGlow(){
-  // 半月圆盘
-  var moonGeo=new THREE.CircleGeometry(80,32);
-  var moonMat=new THREE.MeshBasicMaterial({color:0xc8ddf0,transparent:true,opacity:0.55,depthWrite:false});
-  var moon=new THREE.Mesh(moonGeo,moonMat);
-  moon.position.set(-3200,2800,-4000);
-  moon.lookAt(0,0,0);
-  scene.add(moon);
-  // 月晚化光晓
-  var halos=[{r:140,o:0.15},{r:220,o:0.07},{r:340,o:0.03}];
-  halos.forEach(function(h){
-    var g=new THREE.CircleGeometry(h.r,32);
-    var m=new THREE.MeshBasicMaterial({color:0x8ab8e8,transparent:true,opacity:h.o,depthWrite:false});
-    var mesh=new THREE.Mesh(g,m);
-    mesh.position.set(-3200,2800,-4000);
-    mesh.lookAt(0,0,0);
-    scene.add(mesh);
-  });
-  // 天边微光带（地平线遥远处）
-  var glowGeo=new THREE.PlaneGeometry(14000,180);
-  var glowMat=new THREE.ShaderMaterial({
-    transparent:true,depthWrite:false,
-    uniforms:{},
-    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader:'varying vec2 vUv;void main(){float a=pow(1.0-abs(vUv.y*2.0-1.0),2.0)*0.18;gl_FragColor=vec4(0.2,0.4,0.7,a);}'
-  });
-  var glowMesh=new THREE.Mesh(glowGeo,glowMat);
-  glowMesh.position.set(0,160,-4500);
-  scene.add(glowMesh);
-}
-// ---------- 星空 ----------
-function buildStars(){
-  var count=3000;
-  var geo=new THREE.BufferGeometry();
-  var pts=new Float32Array(count*3);
-  for(var i=0;i<count;i++){
-    var theta=Math.random()*Math.PI*2;
-    var phi=Math.acos(2*Math.random()-1);
-    var r=8000+Math.random()*2000;
-    pts[i*3]=r*Math.sin(phi)*Math.cos(theta);
-    pts[i*3+1]=Math.abs(r*Math.cos(phi))+200; // 只在天空半球
-    pts[i*3+2]=r*Math.sin(phi)*Math.sin(theta);
-  }
-  geo.setAttribute('position',new THREE.BufferAttribute(pts,3));
-  var mat=new THREE.PointsMaterial({
-    color:0xaac8e8,size:1.2,transparent:true,opacity:0.7,
-    sizeAttenuation:true,depthWrite:false
-  });
-  scene.add(new THREE.Points(geo,mat));
-}
-
-// ---------- 山林树木 ----------
+// ── 森林（InstancedMesh 深色松树轮廓） ───────────────────────────
 function buildForest(){
-  var TK=new THREE.CylinderGeometry(0.5,1.2,8,5);
-  var LD=new THREE.ConeGeometry(4.5,14,6);
-  var LD2=new THREE.ConeGeometry(3.5,10,6);
-  var tkMat=new THREE.MeshStandardMaterial({color:0x0e0b08,roughness:1});
-  var ldMat=new THREE.MeshStandardMaterial({color:0x041208,roughness:0.9,emissive:0x010604,emissiveIntensity:0.2});
-  var count=800;
-  var tkInst=new THREE.InstancedMesh(TK,tkMat,count);
-  var ldInst=new THREE.InstancedMesh(LD,ldMat,count);
-  var ldInst2=new THREE.InstancedMesh(LD2,ldMat,count);
-  var dummy=new THREE.Object3D();
-  var placed=0;
-  for(var i=0;i<count*5&&placed<count;i++){
-    var x=(Math.random()-0.5)*7000;
-    var z=(Math.random()-0.5)*7000;
-    var h=getTerrainH(x,z);
-    if(h<8||h>280)continue;
-    // 不在公路附近种树
-    var nearRoad=false;
-    for(var k=0;k<RPATH.length;k+=4){
-      if(RPATH[k]&&Math.abs(x-RPATH[k].x)<18&&Math.abs(z-RPATH[k].z)<18){nearRoad=true;break}
-    }
-    if(nearRoad)continue;
-    var s=0.5+Math.random()*0.8;
-    dummy.position.set(x,h+4*s,z);dummy.scale.set(s,s,s);dummy.rotation.y=Math.random()*Math.PI*2;
-    dummy.updateMatrix();tkInst.setMatrixAt(placed,dummy.matrix);
-    dummy.position.y=h+12*s;dummy.updateMatrix();ldInst.setMatrixAt(placed,dummy.matrix);
-    dummy.position.y=h+18*s;dummy.scale.set(s*0.75,s*0.85,s*0.75);dummy.updateMatrix();ldInst2.setMatrixAt(placed,dummy.matrix);
+  var tkg=new THREE.CylinderGeometry(.4,1.1,7.5,5);
+  var ldg=new THREE.ConeGeometry(4.2,13.5,6);
+  var ld2=new THREE.ConeGeometry(3.0,8.5,6);
+  var tkm=new THREE.MeshStandardMaterial({color:0x09060402,roughness:1});
+  var ldm=new THREE.MeshStandardMaterial({color:0x030e05,roughness:.96,emissive:0x010503,emissiveIntensity:.12});
+  var N=750,ti=new THREE.InstancedMesh(tkg,tkm,N),li=new THREE.InstancedMesh(ldg,ldm,N),l2i=new THREE.InstancedMesh(ld2,ldm,N);
+  ti.castShadow=true;li.castShadow=true;
+  var D=new THREE.Object3D(),rp=RC.getPoints(130),placed=0;
+  for(var i=0;i<N*6&&placed<N;i++){
+    var x=(Math.random()-.5)*5400,z=(Math.random()-.5)*5800-300;
+    var h=terrH(x,z);if(h<14||h>295)continue;
+    var nr=true;
+    for(var k=0;k<rp.length;k+=3){var dx=x-rp[k].x,dz=z-rp[k].z;if(dx*dx+dz*dz<320){nr=false;break;}}
+    if(!nr)continue;
+    var s=.5+Math.random()*.8;
+    D.position.set(x,h+3.5*s,z);D.scale.set(s,s,s);D.rotation.y=Math.random()*Math.PI*2;
+    D.updateMatrix();ti.setMatrixAt(placed,D.matrix);
+    D.position.y=h+10*s;D.updateMatrix();li.setMatrixAt(placed,D.matrix);
+    D.position.y=h+16*s;D.scale.set(s*.7,s*.8,s*.7);D.updateMatrix();l2i.setMatrixAt(placed,D.matrix);
     placed++;
   }
-  tkInst.count=placed;ldInst.count=placed;ldInst2.count=placed;
-  tkInst.castShadow=true;ldInst.castShadow=true;
-  scene.add(tkInst);scene.add(ldInst);scene.add(ldInst2);
+  ti.count=li.count=l2i.count=placed;
+  scene.add(ti);scene.add(li);scene.add(l2i);
 }
 
-// ---------- 远山剪影 ----------
-function buildMountainSilhouette(){
-  var angles=20;
-  for(var ring=0;ring<2;ring++){
-    var r=3800+ring*1200;
-    var pts2=[];
-    for(var i=0;i<=angles;i++){
-      var a=i/angles*Math.PI*2;
-      var x=Math.cos(a)*r,z=Math.sin(a)*r;
-      var h=fn(x*0.0003,z*0.0003,4)*500+100+ring*80;
-      pts2.push(new THREE.Vector3(x,h,z));
-      pts2.push(new THREE.Vector3(x,-10,z));
-    }
-    // 简单条带填充远山
-    var geo=new THREE.BufferGeometry().setFromPoints(pts2);
-    var mat=new THREE.LineBasicMaterial({color:0x050c18,linewidth:1});
-    // 用扇形面填充
-    for(var i=0;i<angles;i++){
-      var a1=i/angles*Math.PI*2,a2=(i+1)/angles*Math.PI*2;
-      var h1=fn(Math.cos(a1)*r*0.0003,Math.sin(a1)*r*0.0003,4)*500+100+ring*80;
-      var h2=fn(Math.cos(a2)*r*0.0003,Math.sin(a2)*r*0.0003,4)*500+100+ring*80;
-      var verts=new Float32Array([
-        Math.cos(a1)*r,-10,Math.sin(a1)*r,
-        Math.cos(a1)*r,h1,Math.sin(a1)*r,
-        Math.cos(a2)*r,h2,Math.sin(a2)*r,
-        Math.cos(a1)*r,-10,Math.sin(a1)*r,
-        Math.cos(a2)*r,h2,Math.sin(a2)*r,
-        Math.cos(a2)*r,-10,Math.sin(a2)*r
-      ]);
-      var sg=new THREE.BufferGeometry();
-      sg.setAttribute('position',new THREE.BufferAttribute(verts,3));
-      // 远山颜色：越远越暗
-      var dark=0.015-ring*0.003;
-      var sm=new THREE.MeshBasicMaterial({color:new THREE.Color(dark,dark+0.005,dark+0.01)});
-      scene.add(new THREE.Mesh(sg,sm));
-    }
-  }
+// ── 山间薄雾粒子 ─────────────────────────────────────────────────
+function buildFog(){
+  var N=2600,g=new THREE.BufferGeometry(),p=new Float32Array(N*3);
+  for(var i=0;i<N;i++){p[i*3]=(Math.random()-.5)*5200;p[i*3+1]=12+Math.random()*75;p[i*3+2]=(Math.random()-.5)*5600-400;}
+  g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x152438,size:24,transparent:true,opacity:.2,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending})));
+  // 谷底浓雾层
+  var N2=550,g2=new THREE.BufferGeometry(),p2=new Float32Array(N2*3);
+  for(var j=0;j<N2;j++){p2[j*3]=(Math.random()-.5)*2200;p2[j*3+1]=18+Math.random()*65;p2[j*3+2]=(Math.random()-.5)*2800-700;}
+  g2.setAttribute('position',new THREE.BufferAttribute(p2,3));
+  scene.add(new THREE.Points(g2,new THREE.PointsMaterial({color:0x0c1e35,size:55,transparent:true,opacity:.14,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending})));
 }
 
-// ---------- 主动画循环 ----------
-var camPathT=0; // 镜头沿公路缓慢推进
+// ── 自动镜头（电影跟踪） ─────────────────────────────────────────
+var camT=0,userBusy=false,_ut=null;
+['mousedown','touchstart','wheel'].forEach(function(ev){
+  document.getElementById('cv').addEventListener(ev,function(){
+    userBusy=true;clearTimeout(_ut);_ut=setTimeout(function(){userBusy=false;},5500);
+  });
+});
+
+// ── 主循环 ───────────────────────────────────────────────────────
 function animate(){
   requestAnimationFrame(animate);
   var dt=clock.getDelta(),t=clock.getElapsedTime();
-
-  // 缓慢自动推进镜头（可被OrbitControls覆盖）
-  if(!controls.userInteracting){
-    camPathT=(camPathT+dt*0.006)%1;
-    var roadCurveGlobal=window._roadCurve;
-    if(roadCurveGlobal){
-      var ahead=Math.min(1,camPathT+0.08);
-      var camP=roadCurveGlobal.getPoint(camPathT);
-      var lookP=roadCurveGlobal.getPoint(ahead);
-      // 柔和插值
-      camera.position.lerp(new THREE.Vector3(camP.x+80,camP.y+35,camP.z),0.015);
-      controls.target.lerp(new THREE.Vector3(lookP.x,lookP.y+8,lookP.z),0.015);
-    }
+  if(!userBusy){
+    camT=(camT+dt*.0055)%1;
+    var cur=RC.getPoint(camT),tan=RC.getTangent(camT);
+    var right=new THREE.Vector3(-tan.z,0,tan.x).normalize();
+    var ahead=RC.getPoint(Math.min(1,camT+.055));
+    var tgt=cur.clone().addScaledVector(right,78).add(new THREE.Vector3(0,40,0));
+    camera.position.lerp(tgt,.01);
+    controls.target.lerp(new THREE.Vector3(ahead.x,ahead.y+10,ahead.z),.01);
   }
-
-  // 路灯微弱闪烁（老化路灯效果）
-  for(var i=0;i<roadLights.length;i++){
-    var rl=roadLights[i];
-    var flicker=1+Math.sin(t*0.8+rl.phase)*0.03+Math.sin(t*11.3+rl.phase)*0.015;
-    rl.light.intensity=1.8*flicker;
-  }
-
   controls.update();
-  renderer.render(scene,camera);
+  composer.render();
 }
 
-// ---------- 窗口自适应 ----------
+// ── 窗口自适应 ───────────────────────────────────────────────────
 window.addEventListener('resize',function(){
-  if(!camera||!renderer)return;
-  W=window.innerWidth;H=window.innerHeight;
+  if(!camera||!renderer||!composer)return;
+  W=innerWidth;H=innerHeight;
   camera.aspect=W/H;camera.updateProjectionMatrix();
-  renderer.setSize(W,H);
+  renderer.setSize(W,H);composer.setSize(W,H);
 });
 
-// 标记OrbitControls用户交互
-var oc=null;
-function hookInteract(){
-  if(!controls)return;
-  var el=document.getElementById('cv');
-  ['mousedown','touchstart'].forEach(function(ev){
-    el.addEventListener(ev,function(){controls.userInteracting=true});
-  });
-  ['mouseup','touchend'].forEach(function(ev){
-    el.addEventListener(ev,function(){setTimeout(function(){controls.userInteracting=false},4000)});
-  });
-}
-
-// ---------- 启动 ----------
+// ── 启动 ─────────────────────────────────────────────────────────
 window.addEventListener('load',function(){
   setTimeout(function(){
-    initScene();
-    // 保存全局路曲线用于摄像机路径
-    window._roadCurve=makeRoadPath();
-    hookInteract();
-    document.getElementById('loading').style.display='none';
+    initScene();initBloom();
+    buildSky();buildStars();buildMoon();
+    buildTerrain();buildRoad();buildLamps();
+    buildForest();buildFog();
+    document.getElementById('ld').style.display='none';
     animate();
   },100);
 });
