@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<title>3D数字孪生地形 · 重庆武隆山区公路</title>
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050b18;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#e0f0ff}
+#canvas-container{position:fixed;inset:0}
+#marker-layer{position:fixed;inset:0;pointer-events:none;z-index:10}
+.map-marker{position:absolute;pointer-events:auto;cursor:pointer;transform:translate(-50%,-100%);transition:transform .15s}
+.map-marker:hover{transform:translate(-50%,-110%) scale(1.15)}
+.map-marker-dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px currentColor,0 0 4px #fff}
+.map-marker-ring{position:absolute;top:-8px;left:-8px;width:30px;height:30px;border-radius:50%;border:2px solid currentColor;opacity:.5;animation:pulseRing 2s ease-out infinite}
+@keyframes pulseRing{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+.map-label{position:absolute;transform:translate(-50%,-130%);background:rgba(6,18,36,.82);color:#00e0ff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;border:1px solid rgba(0,200,255,.4);white-space:nowrap;text-shadow:0 0 4px rgba(0,200,255,.6),0 0 2px rgba(0,0,0,.8);pointer-events:none}
+.map-label.hl{background:rgba(239,68,68,.88);color:#fff;border-color:#fca5a5;text-shadow:0 0 4px rgba(0,0,0,.8)}
+.map-popup{position:absolute;transform:translate(-50%,-100%);background:rgba(8,20,40,.96);border:1px solid rgba(0,200,255,.35);border-radius:10px;padding:14px 16px;min-width:280px;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(0,200,255,.15);z-index:20;pointer-events:auto;display:none}
+.map-popup.show{display:block}
+.map-popup-title{font-size:13px;font-weight:bold;color:#00e0ff;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.map-popup-row{display:flex;justify-content:space-between;font-size:11px;margin:3px 0;color:#c0d8e8}
+.map-popup-row span:first-child{color:#6a8caa}
+.map-popup-row span:last-child{color:#e0f0ff;font-weight:bold}
+.map-popup-action{margin-top:8px;padding:6px 14px;background:linear-gradient(135deg,#1a5276,#2e86c1);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;width:100%;font-weight:bold}
+.map-popup-action:hover{background:linear-gradient(135deg,#2471a3,#3498db)}
+.map-popup-close{position:absolute;top:6px;right:8px;cursor:pointer;color:#6a8caa;font-size:14px}
+.map-popup-close:hover{color:#fff}
+#ui-overlay{position:fixed;inset:0;pointer-events:none;z-index:5}
+#title-bar{position:absolute;top:0;left:0;right:0;padding:10px 20px;background:linear-gradient(180deg,rgba(5,11,24,.92),transparent);pointer-events:none}
+#title-bar h1{font-size:18px;font-weight:bold;color:#fff;text-shadow:0 0 10px rgba(0,200,255,.4)}
+#title-bar .sub{font-size:11px;color:#6a8caa;margin-top:2px}
+#legend{position:absolute;bottom:20px;left:20px;background:rgba(8,20,40,.88);border:1px solid rgba(0,200,255,.25);border-radius:10px;padding:12px 16px;pointer-events:auto}
+#legend h3{font-size:11px;color:#00e0ff;margin-bottom:8px;font-weight:bold}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:10px;color:#c0d8e8;margin:4px 0}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#controls{position:absolute;top:60px;right:20px;display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+.ctrl-btn{padding:8px 14px;background:rgba(8,20,40,.88);border:1px solid rgba(0,200,255,.25);border-radius:8px;color:#c0d8e8;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ctrl-btn:hover{background:rgba(0,200,255,.15);border-color:rgba(0,200,255,.5);color:#fff}
+.ctrl-btn.active{background:rgba(0,200,255,.2);border-color:#00e0ff;color:#00e0ff}
+#info-panel{position:absolute;bottom:20px;right:20px;background:rgba(8,20,40,.88);border:1px solid rgba(0,200,255,.25);border-radius:10px;padding:10px 14px;font-size:10px;color:#6a8caa;pointer-events:auto}
+#info-panel b{color:#00e0ff}
+#loading{position:fixed;inset:0;background:#050b18;display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:16px}
+#loading .spinner{width:40px;height:40px;border:3px solid rgba(0,200,255,.2);border-top-color:#00e0ff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading .text{color:#6a8caa;font-size:13px}
+#compass{position:absolute;top:60px;left:20px;width:50px;height:50px;pointer-events:none}
+#compass svg{width:100%;height:100%}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="marker-layer"></div>
+<div id="ui-overlay">
+  <div id="title-bar">
+    <h1>⛰️ 重庆武隆山区公路 · 3D数字孪生地形</h1>
+    <div class="sub">程序化地形建模 · 无限缩放高清 · G319/S203/G65 监测路段</div>
+  </div>
+  <div id="compass">
+    <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="22" fill="rgba(8,20,40,.7)" stroke="rgba(0,200,255,.3)" stroke-width="1"/><polygon id="compass-needle" points="25,8 21,25 25,22 29,25" fill="#ef4444"/><polygon points="25,42 21,25 25,28 29,25" fill="#6a8caa"/><text x="25" y="6" fill="#00e0ff" font-size="6" text-anchor="middle">N</text></svg>
+  </div>
+  <div id="controls">
+    <button class="ctrl-btn" onclick="resetView()">🎯 重置视角</button>
+    <button class="ctrl-btn" id="btn-wire" onclick="toggleWireframe()">🔲 线框模式</button>
+    <button class="ctrl-btn" id="btn-rotate" onclick="toggleAutoRotate()">🔄 自动旋转</button>
+    <button class="ctrl-btn" onclick="zoomToMarker()">📍 定位滑坡点</button>
+    <a class="ctrl-btn" href="1.html" style="text-decoration:none;text-align:center">← 返回主系统</a>
+  </div>
+  <div id="legend">
+    <h3>图例</h3>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>滑坡灾害点</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>积水/洪涝点</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>塌陷/落石点</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>监测传感器</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff"></div>道路网络</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e6bb8"></div>乌江水系</div>
+  </div>
+  <div id="info-panel">
+    视角高度：<b id="cam-alt">2500</b>m · 坡度：<b id="cam-pitch">58</b>°<br>
+    坐标：<b id="cam-coord">107.77, 29.35</b>
+  </div>
+</div>
+<div id="loading"><div class="spinner"></div><div class="text">正在生成3D地形...</div></div>
+<script>
+// ============ 数据定义 ============
+var TERRAIN_SIZE=8000, SEGMENTS=400, HEIGHT_SCALE=280;
+var riverPath=[[-400,-4000],[-300,-3000],[-150,-2000],[-50,-1000],[50,0],[180,1000],[320,2000],[450,3000],[550,4000]];
+var roads=[
+  {name:'G319 武隆段',color:0x00e5ff,width:4,points:[[-3500,-600],[-2500,-400],[-1500,-100],[-500,150],[500,300],[1500,420],[2500,520],[3500,600]]},
+  {name:'S203 省道',color:0x00b8d4,width:4,points:[[-250,-3500],[-150,-2500],[-50,-1500],[50,-500],[120,500],[200,1500],[280,2500],[360,3500]]},
+  {name:'G65 渝湘高速',color:0x40c4ff,width:5,points:[[2800,-3500],[2700,-2500],[2550,-1500],[2400,-500],[2250,500],[2100,1500],[1950,2500],[1800,3500]]}
+];
+var markers=[
+  {name:'S203 K124+300 滑坡点',type:'landslide',x:120,z:-900,risk:92,status:'半幅抢通·持续监测',action:'加密监测+清运土石方',phase:'处置中'},
+  {name:'G319 K56+800 积水点',type:'flood',x:-2200,z:-100,risk:65,status:'已降速管制',action:'排水作业+警示标志',phase:'已处理'},
+  {name:'仙女山 K4+300 落石点',type:'rockfall',x:2200,z:2200,risk:48,status:'已设防护网',action:'防护网加固+巡查',phase:'已处置'},
+  {name:'S204 K89+100 边坡监测',type:'monitor',x:-1800,z:2800,risk:55,status:'降雨持续·加密监测',action:'位移传感器5min/次',phase:'监测中'},
+  {name:'S501 K15+100 路基冲刷',type:'flood',x:-2800,z:1500,risk:42,status:'边坡冲刷预警',action:'加固路基+截水沟',phase:'监测中'},
+  {name:'S203 K124+200 交通管制',type:'monitor',x:80,z:-600,risk:38,status:'远端分流中',action:'交通引导+信息发布',phase:'执行中'}
+];
+var labels=[
+  {name:'武隆城区',x:-100,z:300,hl:false},
+  {name:'S203 K124+300 滑坡点',x:120,z:-900,hl:true},
+  {name:'仙女山镇',x:2200,z:2200,hl:false},
+  {name:'江口镇',x:600,z:2800,hl:false},
+  {name:'火炉镇',x:-1600,z:-1400,hl:false},
+  {name:'G65 武隆互通',x:2250,z:500,hl:false},
+  {name:'乌江',x:200,z:1500,hl:false},
+  {name:'羊角镇',x:-1400,z:1800,hl:false}
+];
+// ============ 噪声函数 ============
+function hash2(x,y){var h=x*374761393+y*668265263;h=(h^(h>>13))*1274126177;return((h^(h>>16))>>>0)/4294967295}
+function smoothNoise(x,y){var ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy;var a=hash2(ix,iy),b=hash2(ix+1,iy),c=hash2(ix,iy+1),d=hash2(ix+1,iy+1);var ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);return a*(1-ux)*(1-uy)+b*ux*(1-uy)+c*(1-ux)*uy+d*ux*uy}
+function fractalNoise(x,y,oct){var v=0,amp=1,freq=1,max=0;for(var i=0;i<oct;i++){v+=smoothNoise(x*freq,y*freq)*amp;max+=amp;amp*=0.5;freq*=2}return v/max}
+// ============ 地形高度函数 ============
+function distToSegment(px,pz,x1,z1,x2,z2){
+  var dx=x2-x1,dz=z2-z1,l2=dx*dx+dz*dz;if(l2===0)return Math.hypot(px-x1,pz-z1);
+  var t=Math.max(0,Math.min(1,((px-x1)*dx+(pz-z1)*dz)/l2));
+  return Math.hypot(px-(x1+t*dx),pz-(z1+t*dz));
+}
+function distToRiver(x,z){var min=Infinity;for(var i=0;i<riverPath.length-1;i++){var d=distToSegment(x,z,riverPath[i][0],riverPath[i][1],riverPath[i+1][0],riverPath[i+1][1]);if(d<min)min=d}return min}
+function getTerrainHeight(x,z){
+  var h=0;
+  h+=(fractalNoise(x*0.0004,z*0.0004,5)-0.5)*320;
+  h+=(fractalNoise(x*0.0015,z*0.0015,3)-0.5)*80;
+  h+=(fractalNoise(x*0.006,z*0.006,2)-0.5)*25;
+  var rd=distToRiver(x,z);
+  h-=Math.exp(-rd*rd/80000)*90;
+  var dist=Math.sqrt(x*x+z*z),maxD=4200;
+  h*=Math.max(0.15,1-Math.pow(dist/maxD,3));
+  var eastBias=x>0?1:0.3;
+  h*=0.4+eastBias*0.6;
+  h+=fractalNoise(x*0.0002,z*0.0002,3)*30;
+  return Math.max(0,h);
+}
+// ============ 颜色函数 ============
+function elevationToColor(h,slope){
+  var n=fractalNoise(h*0.02,slope*5,2);
+  var r,g,b;
+  if(h<8){r=0.08+n*0.04;g=0.22+n*0.06;b=0.42+n*0.08}
+  else if(h<20){r=0.48+n*0.1;g=0.42+n*0.08;b=0.28+n*0.06}
+  else if(h<70){var t=(70-h)/50;r=0.18+t*0.15+n*0.08;g=0.38+t*0.2+n*0.06;b=0.14+t*0.05+n*0.04}
+  else if(h<140){var t=(140-h)/70;r=0.16+n*0.06;g=0.28+t*0.1+n*0.05;b=0.12+n*0.03}
+  else if(h<210){var t=(210-h)/70;r=0.32+n*0.08;g=0.26+n*0.06;b=0.2+n*0.05}
+  else{r=0.6+n*0.1;g=0.58+n*0.08;b=0.52+n*0.06}
+  if(slope>0.5){var sm=(slope-0.5)*2;r=r*(1-sm*0.3)+0.3*sm;g=g*(1-sm*0.3)+0.25*sm;b=b*(1-sm*0.3)+0.2*sm}
+  return{r:Math.min(1,r),g:Math.min(1,g),b:Math.min(1,b)};
+}
+// ============ 全局变量 ============
+var scene,camera,renderer,controls,terrainMesh,wireMesh,riverMesh,roadGroup;
+var markerObjs=[],labelObjs=[],clock=new THREE.Clock();
+var raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
+var popupEl;
+// ============ 场景初始化 ============
+function initScene(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0a1830);
+  scene.fog=new THREE.FogExp2(0x0a1830,0.00012);
+  var aspect=window.innerWidth/window.innerHeight;
+  camera=new THREE.PerspectiveCamera(55,aspect,10,20000);
+  camera.position.set(3500,2800,3500);
+  camera.lookAt(0,0,0);
+  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;
+  controls.dampingFactor=0.06;
+  controls.maxPolarAngle=Math.PI*0.49;
+  controls.minDistance=200;
+  controls.maxDistance=9000;
+  controls.target.set(0,0,0);
+  // 光照
+  var sun=new THREE.DirectionalLight(0xfff5e0,1.2);
+  sun.position.set(3000,5000,2000);
+  sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-5000;sun.shadow.camera.right=5000;
+  sun.shadow.camera.top=5000;sun.shadow.camera.bottom=-5000;
+  sun.shadow.camera.near=100;sun.shadow.camera.far=12000;
+  sun.shadow.bias=-0.0005;
+  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x3a5070,0.5));
+  scene.add(new THREE.HemisphereLight(0x88aacc,0x442211,0.4));
+  // 天空球
+  var skyGeo=new THREE.SphereGeometry(15000,32,16);
+  var skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{topColor:{value:new THREE.Color(0x0a1830)},bottomColor:{value:new THREE.Color(0x1a3050)},offset:{value:2000},exponent:{value:0.6}},vertexShader:'varying vec3 vWorldPos;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vWorldPos=wp.xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'uniform vec3 topColor;uniform vec3 bottomColor;uniform float offset;uniform float exponent;varying vec3 vWorldPos;void main(){float h=normalize(vWorldPos+vec3(0.0,offset,0.0)).y;float t=max(pow(max(h,0.0),exponent),0.0);gl_FragColor=vec4(mix(bottomColor,topColor,t),1.0);}'});
+  scene.add(new THREE.Mesh(skyGeo,skyMat));
+}
+// ============ 地形生成 ============
+function buildTerrain(){
+  var geo=new THREE.PlaneGeometry(TERRAIN_SIZE,TERRAIN_SIZE,SEGMENTS,SEGMENTS);
+  geo.rotateX(-Math.PI/2);
+  var pos=geo.attributes.position;
+  var colors=[];
+  for(var i=0;i<pos.count;i++){
+    var x=pos.getX(i),z=pos.getZ(i);
+    var h=getTerrainHeight(x,z);
+    pos.setY(i,h);
+    // 计算坡度
+    var hx=getTerrainHeight(x+25,z)-getTerrainHeight(x-25,z);
+    var hz=getTerrainHeight(x,z+25)-getTerrainHeight(x,z-25);
+    var slope=Math.min(1,Math.sqrt(hx*hx+hz*hz)/50);
+    var c=elevationToColor(h,slope);
+    colors.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  var mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.92,metalness:0.05,flatShading:false});
+  terrainMesh=new THREE.Mesh(geo,mat);
+  terrainMesh.receiveShadow=true;
+  terrainMesh.castShadow=true;
+  scene.add(terrainMesh);
+  // 线框叠加
+  var wireMat=new THREE.MeshBasicMaterial({color:0x00e0ff,wireframe:true,transparent:true,opacity:0.06});
+  wireMesh=new THREE.Mesh(geo,wireMat);
+  wireMesh.visible=false;
+  scene.add(wireMesh);
+  // 地面网格(超出地形范围)
+  var grid=new THREE.GridHelper(16000,40,0x0a3a5a,0x082040);
+  grid.position.y=-5;
+  grid.material.transparent=true;
+  grid.material.opacity=0.15;
+  scene.add(grid);
+}
+// ============ 河流(乌江) ============
+function buildRiver(){
+  var pts=[];
+  for(var i=0;i<riverPath.length;i++){
+    var x=riverPath[i][0],z=riverPath[i][1];
+    var h=getTerrainHeight(x,z);
+    pts.push(new THREE.Vector3(x,Math.max(h-2,2),z));
+  }
+  var curve=new THREE.CatmullRomCurve3(pts);
+  var geo=new THREE.TubeGeometry(curve,200,80,8,false);
+  var mat=new THREE.MeshStandardMaterial({color:0x1a6dbb,transparent:true,opacity:0.82,roughness:0.2,metalness:0.6,emissive:0x0a3a6a,emissiveIntensity:0.3});
+  riverMesh=new THREE.Mesh(geo,mat);
+  scene.add(riverMesh);
+}
+// ============ 道路 ============
+function buildRoads(){
+  roadGroup=new THREE.Group();
+  for(var r=0;r<roads.length;r++){
+    var road=roads[r];
+    var pts=[];
+    for(var i=0;i<road.points.length;i++){
+      var x=road.points[i][0],z=road.points[i][1];
+      var h=getTerrainHeight(x,z)+3;
+      pts.push(new THREE.Vector3(x,h,z));
+    }
+    var curve=new THREE.CatmullRomCurve3(pts);
+    // 主路
+    var geo=new THREE.TubeGeometry(curve,300,road.width,6,false);
+    var mat=new THREE.MeshStandardMaterial({color:road.color,emissive:road.color,emissiveIntensity:0.7,roughness:0.4,metalness:0.3});
+    var mesh=new THREE.Mesh(geo,mat);
+    roadGroup.add(mesh);
+    // 发光底层
+    var glowGeo=new THREE.TubeGeometry(curve,300,road.width*2.5,6,false);
+    var glowMat=new THREE.MeshBasicMaterial({color:road.color,transparent:true,opacity:0.12});
+    roadGroup.add(new THREE.Mesh(glowGeo,glowMat));
+  }
+  scene.add(roadGroup);
+}
+// ============ 3D标记柱 ============
+function buildMarker3D(m,idx){
+  var h=getTerrainHeight(m.x,m.z);
+  var color=m.type==='flood'?0x3b82f6:m.type==='landslide'?0xf97316:m.type==='rockfall'?0x8b5cf6:0x22c55e;
+  var group=new THREE.Group();
+  // 柱体
+  var pillarGeo=new THREE.CylinderGeometry(3,5,60,8);
+  var pillarMat=new THREE.MeshStandardMaterial({color:color,emissive:color,emissiveIntensity:0.5,transparent:true,opacity:0.85});
+  var pillar=new THREE.Mesh(pillarGeo,pillarMat);
+  pillar.position.set(m.x,h+30,m.z);
+  group.add(pillar);
+  // 顶部球
+  var ballGeo=new THREE.SphereGeometry(8,12,12);
+  var ballMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:color,emissiveIntensity:0.8});
+  var ball=new THREE.Mesh(ballGeo,ballMat);
+  ball.position.set(m.x,h+65,m.z);
+  group.add(ball);
+  // 底部环
+  var ringGeo=new THREE.RingGeometry(12,18,24);
+  ringGeo.rotateX(-Math.PI/2);
+  var ringMat=new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.4,side:THREE.DoubleSide});
+  var ring=new THREE.Mesh(ringGeo,ringMat);
+  ring.position.set(m.x,h+1,m.z);
+  group.add(ring);
+  group.userData={marker:m,index:idx,baseH:h};
+  scene.add(group);
+  markerObjs.push(group);
+}
+// ============ HTML标记和标签 ============
+function buildOverlays(){
+  var layer=document.getElementById('marker-layer');
+  // 标记
+  for(var i=0;i<markers.length;i++){
+    var m=markers[i];
+    var color=m.type==='flood'?'#3b82f6':m.type==='landslide'?'#f97316':m.type==='rockfall'?'#8b5cf6':'#22c55e';
+    var el=document.createElement('div');
+    el.className='map-marker';
+    el.style.color=color;
+    el.innerHTML='<div class="map-marker-dot" style="background:'+color+';color:'+color+'"></div>'+(m.risk>=80?'<div class="map-marker-ring"></div>':'');
+    el.dataset.idx=i;
+    el.addEventListener('click',function(e){e.stopPropagation();showPopup(parseInt(this.dataset.idx))});
+    layer.appendChild(el);
+    m._el=el;
+  }
+  // 标签
+  for(var j=0;j<labels.length;j++){
+    var l=labels[j];
+    var lel=document.createElement('div');
+    lel.className='map-label'+(l.hl?' hl':'');
+    lel.textContent=l.name;
+    layer.appendChild(lel);
+    l._el=lel;
+  }
+  // 弹窗
+  popupEl=document.createElement('div');
+  popupEl.className='map-popup';
+  layer.appendChild(popupEl);
+}
+function showPopup(idx){
+  var m=markers[idx];
+  var icon=m.type==='landslide'?'⛰️':m.type==='flood'?'🌊':m.type==='rockfall'?'🪨':'📡';
+  var rc=m.risk>=80?'#ef4444':m.risk>=60?'#f97316':'#3b82f6';
+  var rl=m.risk>=80?'高风险':m.risk>=60?'中风险':'低风险';
+  popupEl.innerHTML='<div class="map-popup-close" onclick="hidePopup()">✕</div>'+
+    '<div class="map-popup-title">'+icon+' '+m.name+'</div>'+
+    '<div class="map-popup-row"><span>灾害类型</span><span>'+(m.type==='landslide'?'山体滑坡':m.type==='flood'?'积水/洪涝':m.type==='rockfall'?'落石/塌陷':'监测点')+'</span></div>'+
+    '<div class="map-popup-row"><span>风险指数</span><span style="color:'+rc+'">'+m.risk+' · '+rl+'</span></div>'+
+    '<div class="map-popup-row"><span>当前状态</span><span>'+m.status+'</span></div>'+
+    '<div class="map-popup-row"><span>处置阶段</span><span>'+m.phase+'</span></div>'+
+    '<div class="map-popup-row"><span>建议措施</span><span>'+m.action+'</span></div>'+
+    '<div class="map-popup-row"><span>坐标</span><span>'+(107.77+m.x/97000).toFixed(4)+', '+(29.35-m.z/111320).toFixed(4)+'</span></div>'+
+    '<button class="map-popup-action" onclick="hidePopup();showToast(\'✅ 已启动'+m.name+'处置方案\')">🚀 启动应急处置方案</button>';
+  popupEl.classList.add('show');
+  popupEl._idx=idx;
+  // 飞向标记
+  var h=getTerrainHeight(m.x,m.z);
+  flyTo(m.x,h+300,m.z+400);
+}
+function hidePopup(){popupEl.classList.remove('show')}
+function showToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(8,20,40,.95);border:1px solid rgba(0,200,255,.4);color:#00e0ff;padding:10px 24px;border-radius:8px;font-size:13px;z-index:200;box-shadow:0 0 20px rgba(0,200,255,.2)';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(function(){document.body.removeChild(t)},400)},2500)}
+// ============ 动画与投影 ============
+function updateOverlays(){
+  var w=window.innerWidth,h=window.innerHeight;
+  var v=new THREE.Vector3();
+  // 标记
+  for(var i=0;i<markers.length;i++){
+    var m=markers[i];
+    v.set(m.x,getTerrainHeight(m.x,m.z)+70,m.z);
+    v.project(camera);
+    if(v.z<1&&v.z>-1){
+      var sx=(v.x*0.5+0.5)*w,sy=(-v.y*0.5+0.5)*h;
+      m._el.style.left=sx+'px';m._el.style.top=sy+'px';m._el.style.display='block';
+      var dist=camera.position.distanceTo(v.set(m.x,getTerrainHeight(m.x,m.z)+70,m.z));
+      var s=Math.max(0.5,Math.min(1.2,3000/dist));
+      m._el.style.transform='translate(-50%,-100%) scale('+s+')';
+    }else{m._el.style.display='none'}
+  }
+  // 标签
+  for(var j=0;j<labels.length;j++){
+    var l=labels[j];
+    v.set(l.x,getTerrainHeight(l.x,l.z)+30,l.z);
+    v.project(camera);
+    if(v.z<1&&v.z>-1){
+      l._el.style.left=(v.x*0.5+0.5)*w+'px';
+      l._el.style.top=(-v.y*0.5+0.5)*h+'px';
+      l._el.style.display='block';
+    }else{l._el.style.display='none'}
+  }
+  // 弹窗跟随
+  if(popupEl.classList.contains('show')&&popupEl._idx!==undefined){
+    var pm=markers[popupEl._idx];
+    v.set(pm.x,getTerrainHeight(pm.x,pm.z)+80,pm.z);
+    v.project(camera);
+    if(v.z<1&&v.z>-1){
+      popupEl.style.left=(v.x*0.5+0.5)*w+'px';
+      popupEl.style.top=(-v.y*0.5+0.5)*h+'px';
+    }
+  }
+  // 3D标记动画
+  var time=clock.getElapsedTime();
+  for(var k=0;k<markerObjs.length;k++){
+    var g=markerObjs[k];
+    var ball=g.children[1];
+    ball.position.y=g.userData.baseH+65+Math.sin(time*2+k)*5;
+    var ring=g.children[2];
+    ring.scale.setScalar(1+Math.sin(time*1.5+k)*0.15);
+    ring.material.opacity=0.3+Math.sin(time*1.5+k)*0.15;
+  }
+  // 信息面板
+  var alt=Math.round(camera.position.y);
+  var pitch=Math.round(THREE.MathUtils.radToDeg(controls.getPolarAngle()));
+  var lng=(107.77+camera.position.x/97000).toFixed(3);
+  var lat=(29.35-camera.position.z/111320).toFixed(3);
+  var ae=document.getElementById('cam-alt');if(ae)ae.textContent=alt;
+  var pe=document.getElementById('cam-pitch');if(pe)pe.textContent=pitch;
+  var ce=document.getElementById('cam-coord');if(ce)ce.textContent=lng+', '+lat;
+  // 罗盘
+  var needle=document.getElementById('compass-needle');
+  if(needle){var ang=-THREE.MathUtils.radToDeg(controls.getAzimuthalAngle());needle.parentElement.style.transform='rotate('+ang+'deg)';needle.parentElement.style.transformOrigin='center'}
+}
+// ============ 交互控制 ============
+function flyTo(x,y,z){var ts=clock.getElapsedTime();var sp=camera.position.clone(),tp=new THREE.Vector3(x,y,z);var st=controls.target.clone();var tt=new THREE.Vector3(x*0.3,0,z*0.3);var dur=1.2;function step(){var t=(clock.getElapsedTime()-ts)/dur;if(t>=1){camera.position.copy(tp);controls.target.copy(tt);return}var e=1-Math.pow(1-t,3);camera.position.lerpVectors(sp,tp,e);controls.target.lerpVectors(st,tt,e);requestAnimationFrame(step)}step()}
+function resetView(){flyTo(3500,2800,3500)}
+function toggleWireframe(){wireMesh.visible=!wireMesh.visible;document.getElementById('btn-wire').classList.toggle('active',wireMesh.visible)}
+function toggleAutoRotate(){controls.autoRotate=!controls.autoRotate;controls.autoRotateSpeed=0.8;document.getElementById('btn-rotate').classList.toggle('active',controls.autoRotate)}
+function zoomToMarker(){showPopup(0)}
+// ============ 主循环 ============
+function animate(){
+  requestAnimationFrame(animate);
+  var t=clock.getElapsedTime();
+  // 河流动画
+  if(riverMesh){riverMesh.material.emissiveIntensity=0.3+Math.sin(t*1.5)*0.1}
+  controls.update();
+  updateOverlays();
+  renderer.render(scene,camera);
+}
+// ============ 窗口适配 ============
+window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+// ============ 启动 ============
+function start(){
+  initScene();
+  renderer.domElement.addEventListener('click',function(e){if(e.target===renderer.domElement)hidePopup()});
+  buildTerrain();
+  buildRiver();
+  buildRoads();
+  for(var i=0;i<markers.length;i++)buildMarker3D(markers[i],i);
+  buildOverlays();
+  document.getElementById('loading').style.display='none';
+  animate();
+  setTimeout(function(){showToast('⛰️ 3D地形已加载 · 鼠标拖拽旋转 · 滚轮缩放 · 点击标记查看详情')},500);
+}
+window.addEventListener('load',function(){setTimeout(start,100)});
+</script>
+</body>
+</html>
