@@ -29,8 +29,18 @@
         .dash-header-title{font-size:22px;font-weight:900;letter-spacing:6px;background:linear-gradient(90deg,#00c8ff,#60a5fa,#00c8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
         .dash-header-left,.dash-header-right{position:absolute;display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8}
         .dash-header-left{left:20px}.dash-header-right{right:20px}
+        /* 顶部实时信息条 */
+        .live-ticker{position:fixed;top:56px;left:0;right:0;height:28px;z-index:25;background:rgba(6,18,36,.92);border-bottom:1px solid rgba(0,200,255,.15);display:flex;align-items:center;overflow:hidden;font-size:11px}
+        .ticker-label{flex-shrink:0;background:rgba(239,68,68,.2);color:#f87171;padding:0 12px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(239,68,68,.3);font-weight:bold}
+        .ticker-content{flex:1;overflow:hidden;position:relative;margin:0 12px}
+        .ticker-track{display:flex;white-space:nowrap;animation:tickerScroll 30s linear infinite}
+        @keyframes tickerScroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+        .ticker-item{padding:0 24px;color:#cbd5e1}
+        .ticker-item strong{color:#f97316}
+        .duty-info{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;border-left:1px solid rgba(0,200,255,.15);color:#94a3b8}
+        .duty-info span{color:#00e0ff;font-weight:bold}
         /* 全屏地图 */
-        .fullscreen-map{position:fixed;top:56px;left:0;right:0;bottom:48px;z-index:1}
+        .fullscreen-map{position:fixed;top:84px;left:0;right:0;bottom:48px;z-index:1}
         .leaflet-container{background:var(--bg-dark)!important}
         .leaflet-container img{image-rendering:auto}
         /* 数据面板 */
@@ -38,8 +48,8 @@
         .dash-panel::before,.dash-panel::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(0,200,255,.5);border-style:solid;pointer-events:none}
         .dash-panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}.dash-panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
         .panel-title{font-size:13px;font-weight:bold;color:var(--cyan);padding-left:14px;margin-bottom:10px;line-height:1;position:relative}.panel-title::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#00c8ff,#0e7490);border-radius:2px}
-        .left-panels{position:fixed;top:66px;left:10px;width:280px;bottom:58px;z-index:10;overflow-y:auto;pointer-events:auto}
-        .right-panels{position:fixed;top:66px;right:10px;width:280px;bottom:58px;z-index:10;overflow-y:auto;pointer-events:auto}
+        .left-panels{position:fixed;top:94px;left:10px;width:280px;bottom:58px;z-index:10;overflow-y:auto;pointer-events:auto}
+        .right-panels{position:fixed;top:94px;right:10px;width:280px;bottom:58px;z-index:10;overflow-y:auto;pointer-events:auto}
         /* 面板内元素 */
         .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,200,255,.15);font-size:12px}.stat-row:last-child{border-bottom:none}
         .stat-label{color:#94a3b8}.stat-val{font-size:20px;font-weight:bold;color:#00e0ff;font-family:'Courier New',monospace;text-shadow:0 0 10px rgba(0,242,254,0.5)}.stat-val small{font-size:11px;color:#64748b;font-weight:normal}.stat-val.warn{color:#f97316;text-shadow:0 0 10px rgba(249,115,22,0.5)}.stat-val.danger{color:#ef4444;text-shadow:0 0 10px rgba(239,68,68,0.5)}
@@ -49,6 +59,9 @@
         .alert-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0}.alert-dot.red{background:#ef4444;box-shadow:0 0 6px #ef4444}.alert-dot.orange{background:#f97316;box-shadow:0 0 6px #f97316}.alert-dot.yellow{background:#eab308;box-shadow:0 0 6px #eab308}
         .alert-text{color:#cbd5e1;line-height:1.4}.alert-meta{color:#64748b;font-size:10px;margin-top:2px}
         .alert-status{font-size:10px;padding:1px 6px;border-radius:8px}.alert-status.handled{background:rgba(16,185,129,.2);color:#34d399}.alert-status.pending{background:rgba(239,68,68,.2);color:#f87171}
+        .alert-progress{height:3px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:4px}
+        .alert-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f97316,#fbbf24);transition:width .6s ease}
+        .alert-progress-text{font-size:9px;color:#fbbf24;text-align:right;margin-top:1px}
         .team-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:11px;border-bottom:1px solid rgba(0,200,255,.1)}.team-row:last-child{border-bottom:none}
         .team-status{font-size:10px;padding:1px 6px;border-radius:8px}.team-status.active{background:rgba(16,185,129,.2);color:#34d399}.team-status.standby{background:rgba(59,130,246,.2);color:#60a5fa}.team-status.rest{background:rgba(107,114,128,.2);color:#9ca3af}
         /* 底部导航 */
@@ -115,14 +128,39 @@
         /* ===== 六边形Logo ===== */
         .hex-logo{width:30px;height:30px;background:linear-gradient(135deg,#00c8ff,#0e7490);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
         /* ===== 装备进度条 ===== */
-        .equip-progress{height:4px;background:#1e293b;border-radius:2px;overflow:hidden;margin:2px 0 4px}
+        .equip-progress{height:4px;background:#1e293b;border-radius:2px;overflow:hidden;margin:2px 0 2px}
         .equip-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#10b981,#34d399);transition:width .6s ease}
+        .equip-ids{font-size:9px;color:#64748b;margin-bottom:6px;padding-left:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        /* ===== 队伍详情 ===== */
+        .team-detail-row{padding:6px 0;border-bottom:1px solid rgba(0,200,255,.1)}
+        .team-detail-row:last-child{border-bottom:none}
+        .team-detail-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:bold;margin-bottom:4px}
+        .team-detail-body{padding-left:14px;font-size:10px}
+        .team-detail-line{display:flex;justify-content:space-between;padding:2px 0}
+        .td-label{color:#64748b}.td-val{color:#94a3b8;font-family:'Courier New',monospace}
+        .team-progress{height:3px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:4px}
+        .team-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .6s ease}
+        .team-progress-text{font-size:9px;color:#60a5fa;text-align:right;margin-top:2px}
         /* ===== 队伍状态圆点 ===== */
         .team-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
         .team-dot.active{background:#10b981;box-shadow:0 0 6px #10b981;animation:pulseDot 1.5s ease-in-out infinite}
         .team-dot.standby{background:#3b82f6;box-shadow:0 0 4px #3b82f6}
         .team-dot.rest{background:#6b7280}
         @keyframes pulseDot{0%,100%{box-shadow:0 0 4px #10b981}50%{box-shadow:0 0 12px #10b981,0 0 24px rgba(16,185,129,.3)}}
+        /* ===== 现场视频/照片模拟窗口 ===== */
+        .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .video-box{background:#07121f;border:1px solid rgba(0,200,255,.2);border-radius:4px;overflow:hidden}
+        .video-box.main-feed{grid-column:1/3}
+        .video-label{font-size:10px;color:#94a3b8;padding:5px 8px;background:rgba(0,200,255,.08);border-bottom:1px solid rgba(0,200,255,.1)}
+        .video-sim{height:90px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,#0a1a2e,#0d2137)}
+        .video-sim.small{height:70px}
+        .video-icon{font-size:28px;opacity:.6}
+        .video-sim.small .video-icon{font-size:22px}
+        .video-meta{position:absolute;bottom:4px;left:6px;font-size:9px;color:#94a3b8;line-height:1.3}
+        .live-badge{position:absolute;top:4px;right:6px;background:#ef4444;color:#fff;font-size:9px;font-weight:bold;padding:1px 5px;border-radius:3px;animation:pulse-glow 1.5s ease-in-out infinite}
+        .photo-strip{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px}
+        .photo-thumb{flex-shrink:0;width:80px;height:55px;background:#07121f;border:1px solid rgba(0,200,255,.15);border-radius:3px;overflow:hidden}
+        .photo-sim{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8;text-align:center;line-height:1.2}
         /* ===== 地图Hover信息卡片 ===== */
         .leaflet-tooltip.map-hover-tooltip{background:rgba(6,30,60,.92)!important;backdrop-filter:blur(12px);border:1px solid rgba(0,200,255,.3)!important;border-radius:8px!important;color:#fff!important;padding:0!important;box-shadow:0 8px 24px rgba(0,0,0,.5)!important;max-width:260px}
         .leaflet-tooltip.map-hover-tooltip::before{border-top-color:rgba(0,200,255,.3)!important}
@@ -134,6 +172,20 @@
         .map-hover-card-value{font-weight:bold}
         /* ===== 底部面板过渡 ===== */
         .drill-bottom{transition:all .4s cubic-bezier(.4,0,.2,1)}
+        /* ===== 演练时间轴 ===== */
+        .drill-timeline{height:200px;overflow-y:auto;font-size:10px;padding-right:4px}
+        .dt-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(0,200,255,.1);position:relative}
+        .dt-item:last-child{border-bottom:none}
+        .dt-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0;background:#334155;position:relative}
+        .dt-dot.active{background:#10b981;box-shadow:0 0 6px #10b981;animation:pulseDot 1.5s ease-in-out infinite}
+        .dt-dot.done{background:#3b82f6}
+        .dt-dot::after{content:'';position:absolute;top:8px;left:3px;width:2px;height:calc(100% + 12px);background:rgba(0,200,255,.1)}
+        .dt-item:last-child .dt-dot::after{display:none}
+        .dt-body{flex:1;line-height:1.3}
+        .dt-time{color:#f97316;font-family:'Courier New',monospace;font-weight:bold}
+        .dt-title{color:#00e0ff;font-weight:bold;margin:1px 0}
+        .dt-desc{color:#94a3b8;font-size:9px}
+        .dt-meta{color:#64748b;font-size:9px;margin-top:2px}
         /* ===== 内容覆盖层过渡 ===== */
         .content-overlay{animation:fadeInUp .4s ease forwards}
         @media(max-width:1200px){.left-panels,.right-panels{width:220px}.drill-metrics{flex-direction:column}}
@@ -168,17 +220,40 @@
                     <span style="font-size:12px;font-family:'Courier New',monospace;color:#c8d6e5;letter-spacing:1px">{{ currentTime }}</span>
                     <span style="font-size:11px;color:#64748b">|</span>
                     <span style="font-size:11px;color:#f97316">⚠️ 二级响应 · S203滑坡处置中</span>
+                    <span style="font-size:11px;color:#64748b">|</span>
+                    <span style="font-size:11px;color:#00e0ff">⏱️ 处置已持续 {{responseDuration}}</span>
                 </div>
                 <div class="dash-header-title">重庆山区公路应急数字孪生演练系统</div>
                 <div class="dash-header-right">
                     <button @click="showPlanModal=true" class="btn-glow" style="font-size:11px;padding:4px 12px">🤖 智能方案</button>
                     <span id="weatherDisplay" style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:3px">🌤️ 重庆武隆 加载中...</span>
                     <span style="font-size:11px;color:#94a3b8">|</span>
-                    <span style="font-size:11px;color:#34d399">在线用户：8人（指挥中心/现场/专家）</span>
+                    <span style="font-size:11px;color:#34d399">在线：8人</span>
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-glow"></span>
-                    <span>管理员 · 在线</span>
+                    <span>值班：张建国</span>
                 </div>
             </header>
+
+            <!-- 实时警情跑马灯 -->
+            <div class="live-ticker">
+                <div class="ticker-label">🚨 实时警情</div>
+                <div class="ticker-content">
+                    <div class="ticker-track">
+                        <span class="ticker-item"><strong>[08:15:22]</strong> S203 K124+300 边坡位移传感器触发红色预警，位移速率 3.2mm/h</span>
+                        <span class="ticker-item"><strong>[08:23:45]</strong> 巡查无人机确认：滑坡体约 3200m³，半幅路面被埋，1辆社会车辆滞留（人员已撤离）</span>
+                        <span class="ticker-item"><strong>[08:31:06]</strong> 区交通局/交警大队/养护中心三方会商，启动二级应急响应</span>
+                        <span class="ticker-item"><strong>[08:50:44]</strong> 武隆抢通一队 32 人、挖掘机 2 台、装载机 2 台、自卸车 6 台抵达现场</span>
+                        <span class="ticker-item"><strong>[09:15:00]</strong> 半幅抢通完成，累计清运土石方 1800m³，滞留车辆有序放行</span>
+                        <span class="ticker-item"><strong>[11:40:22]</strong> 滑坡体全部清运，边坡防护网铺设完成，路段恢复双向通行</span>
+                        <span class="ticker-item"><strong>[当前]</strong> 持续监测中，降雨橙色预警生效，位移传感器加密至 5min/次</span>
+                    </div>
+                </div>
+                <div class="duty-info">
+                    <span>值班长：李卫东</span>
+                    <span>调度：王雪梅</span>
+                    <span>技术：陈志强</span>
+                </div>
+            </div>
 
             <!-- 全屏地图 -->
             <div class="fullscreen-map">
@@ -233,6 +308,40 @@
                     <div class="ind-row"><span class="ind-label">累计清运</span><span class="ind-val">1800m³</span></div>
                 </div>
                 <div class="dash-panel">
+                    <div class="panel-title">🎥 现场回传画面</div>
+                    <div class="video-grid">
+                        <div class="video-box main-feed">
+                            <div class="video-label">无人机航拍 · K124+300</div>
+                            <div class="video-sim">
+                                <div class="video-icon">🚁</div>
+                                <div class="video-meta">实时画面<br>海拔 892m · 风速 3级</div>
+                                <div class="live-badge">LIVE</div>
+                            </div>
+                        </div>
+                        <div class="video-box">
+                            <div class="video-label">边坡监测摄像头</div>
+                            <div class="video-sim small">
+                                <div class="video-icon">📹</div>
+                                <div class="video-meta">位移监测中</div>
+                                <div class="live-badge">LIVE</div>
+                            </div>
+                        </div>
+                        <div class="video-box">
+                            <div class="video-label">抢险作业面</div>
+                            <div class="video-sim small">
+                                <div class="video-icon">🚜</div>
+                                <div class="video-meta">挖掘机作业</div>
+                                <div class="live-badge">LIVE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="photo-strip">
+                        <div class="photo-thumb"><div class="photo-sim">📸 滑坡体全景</div></div>
+                        <div class="photo-thumb"><div class="photo-sim">📸 警戒区布设</div></div>
+                        <div class="photo-thumb"><div class="photo-sim">📸 车辆放行</div></div>
+                    </div>
+                </div>
+                <div class="dash-panel">
                     <div class="panel-title">5·16 案例应急核心指标</div>
                     <div class="ind-row"><span class="ind-label">监测预警触发</span><span class="ind-val">08:15:22</span></div>
                     <div class="ind-row"><span class="ind-label">灾害首报时间</span><span class="ind-val">28 min</span></div>
@@ -257,25 +366,43 @@
                     <div style="margin-top:8px">
                         <div class="ind-row"><span class="ind-label">挖掘机</span><span class="ind-val">{{ equipDetail.excavator.total }} 台<small style="color:#34d399">（在线{{ equipDetail.excavator.online }}）</small></span></div>
                         <div class="equip-progress"><div class="equip-progress-fill" :style="{width:(equipDetail.excavator.online/equipDetail.excavator.total*100)+'%'}"></div></div>
+                        <div class="equip-ids">{{equipDetail.excavator.ids}}</div>
                         <div class="ind-row"><span class="ind-label">装载机</span><span class="ind-val">{{ equipDetail.loader.total }} 台<small style="color:#34d399">（在线{{ equipDetail.loader.online }}）</small></span></div>
                         <div class="equip-progress"><div class="equip-progress-fill" :style="{width:(equipDetail.loader.online/equipDetail.loader.total*100)+'%'}"></div></div>
+                        <div class="equip-ids">{{equipDetail.loader.ids}}</div>
                         <div class="ind-row"><span class="ind-label">应急发电机</span><span class="ind-val">{{ equipDetail.generator.total }} 台<small style="color:#34d399">（在线{{ equipDetail.generator.online }}）</small></span></div>
                         <div class="equip-progress"><div class="equip-progress-fill" :style="{width:(equipDetail.generator.online/equipDetail.generator.total*100)+'%'}"></div></div>
+                        <div class="equip-ids">{{equipDetail.generator.ids}}</div>
                         <div class="ind-row"><span class="ind-label">排水泵车</span><span class="ind-val">{{ equipDetail.pump_truck.total }} 台<small style="color:#34d399">（在线{{ equipDetail.pump_truck.online }}）</small></span></div>
                         <div class="equip-progress"><div class="equip-progress-fill" :style="{width:(equipDetail.pump_truck.online/equipDetail.pump_truck.total*100)+'%'}"></div></div>
+                        <div class="equip-ids">{{equipDetail.pump_truck.ids}}</div>
                         <div class="ind-row"><span class="ind-label">应急照明设备</span><span class="ind-val">{{ equipDetail.lighting.total }} 套<small style="color:#34d399">（在线{{ equipDetail.lighting.online }}）</small></span></div>
                         <div class="equip-progress"><div class="equip-progress-fill" :style="{width:(equipDetail.lighting.online/equipDetail.lighting.total*100)+'%'}"></div></div>
+                        <div class="equip-ids">{{equipDetail.lighting.ids}}</div>
                     </div>
                 </div>
                 <div class="dash-panel">
                     <div class="panel-title">应急队伍监控</div>
                     <div id="teamDonutChart" style="height:100px"></div>
                     <div style="margin-top:4px">
-                        <div class="team-row" v-for="t in teams" :key="t.name"><span><span :class="['team-dot',t.cls]"></span>{{t.name}}</span><span :class="['team-status',t.cls]">{{t.status}}</span></div>
+                        <div class="team-detail-row" v-for="t in teams" :key="t.name">
+                            <div class="team-detail-head">
+                                <span><span :class="['team-dot',t.cls]"></span>{{t.name}}</span>
+                                <span :class="['team-status',t.cls]">{{t.status}}</span>
+                            </div>
+                            <div class="team-detail-body">
+                                <div class="team-detail-line"><span class="td-label">负责人</span><span class="td-val">{{t.leader}}</span></div>
+                                <div class="team-detail-line"><span class="td-label">人数</span><span class="td-val">{{t.headcount}}人</span></div>
+                                <div class="team-detail-line"><span class="td-label">车辆/装备</span><span class="td-val">{{t.vehicles}}</span></div>
+                                <div class="team-detail-line"><span class="td-label">当前任务</span><span class="td-val">{{t.task}}</span></div>
+                                <div class="team-progress"><div class="team-progress-fill" :style="{width:t.progress+'%'}"></div></div>
+                                <div class="team-progress-text">任务进度 {{t.progress}}%</div>
+                            </div>
+                        </div>
                     </div>
                     <div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(0,200,255,.2)">
-                        <div class="ind-row"><span class="ind-label">5·16现场力量</span><span class="ind-val">3组 / 36人 / 10台装备</span></div>
-                        <div class="ind-row"><span class="ind-label">应急抢险队合计</span><span class="ind-val">6支 / 160人</span></div>
+                        <div class="ind-row"><span class="ind-label">5·16现场力量</span><span class="ind-val">3组 / 66人 / 10台装备</span></div>
+                        <div class="ind-row"><span class="ind-label">应急抢险队合计</span><span class="ind-val">6支 / 140人</span></div>
                         <div class="ind-row"><span class="ind-label">养护巡查组</span><span class="ind-val">12组 / 36人</span></div>
                         <div class="ind-row"><span class="ind-label">技术专家组</span><span class="ind-val">1组 / 8人</span></div>
                         <div class="ind-row"><span class="ind-label">当前在岗率</span><span class="ind-val">92.3%</span></div>
@@ -287,7 +414,9 @@
                         <span :class="['alert-dot',a.color]"></span>
                         <div style="flex:1">
                             <div class="alert-text">{{a.content}}</div>
-                            <div class="alert-meta">{{a.time}} <span :class="['alert-status',a.statusCls]">{{a.status}}</span></div>
+                            <div class="alert-meta">{{a.time}} <span :class="['alert-status',a.statusCls]">{{a.status}}</span> · 责任人：{{a.owner}}</div>
+                            <div class="alert-progress"><div class="alert-progress-fill" :style="{width:a.progress+'%'}"></div></div>
+                            <div class="alert-progress-text">处置进度 {{a.progress}}%</div>
                         </div>
                     </div>
                 </div>
@@ -315,6 +444,20 @@
                         <div style="font-size:11px;overflow-y:auto;max-height:200px" class="text-slate-300 pr-1">
                             <div v-for="(item, idx) in getEvalItems(currentTab)" :key="item.label + drillDataSeed" class="score-card" style="padding:4px 6px;margin-bottom:4px">
                                 <span :class="item.color">●</span> {{item.label}}: {{item.value}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drill-metric-card" style="flex:1.2">
+                        <div class="panel-title" style="font-size:11px">⏱️ 实时处置时间轴</div>
+                        <div class="drill-timeline">
+                            <div class="dt-item" v-for="e in drillTimeline" :key="e.time">
+                                <div class="dt-dot" :class="e.done?'done':'active'"></div>
+                                <div class="dt-body">
+                                    <div class="dt-time">{{e.time}}</div>
+                                    <div class="dt-title">{{e.title}}</div>
+                                    <div class="dt-desc">{{e.desc}}</div>
+                                    <div class="dt-meta" v-if="e.owner">责任人：{{e.owner}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -606,8 +749,18 @@
                 const loginUsername = ref('Admin');
                 const loginPassword = ref('123456');
                 const currentTime = ref('');
+                const responseDuration = ref('16小时 32分');
                 let timeInterval = null;
-                const updateTime = () => { const now=new Date(); currentTime.value=now.toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); };
+                const incidentStart = new Date('2025-05-16T08:15:22');
+                const updateTime = () => {
+                    const now=new Date();
+                    currentTime.value=now.toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+                    const diff = Math.floor((now - incidentStart)/1000);
+                    const h = Math.floor(diff/3600);
+                    const m = Math.floor((diff%3600)/60);
+                    const s = diff%60;
+                    responseDuration.value = `${h}小时 ${m}分 ${s}秒`;
+                };
 
                 // 底部导航项
                 const dashboardNavItems = [
@@ -639,12 +792,12 @@
                 ];
                 // 大屏面板数据
                 const teams = ref([
-                    {name:'武隆抢通一队（32人）',status:'S203现场作业',cls:'active'},
-                    {name:'武隆抢通二队（30人）',status:'K124远端分流',cls:'active'},
-                    {name:'武隆巡查无人机组（4人）',status:'边坡监测中',cls:'active'},
-                    {name:'城口防汛三队（28人）',status:'待命',cls:'standby'},
-                    {name:'黔江应急四队（38人）',status:'待命',cls:'standby'},
-                    {name:'渝东南地质专家组（8人）',status:'技术研判',cls:'standby'}
+                    {name:'武隆抢通一队',status:'现场作业',cls:'active',leader:'队长 王建军',headcount:32,vehicles:'渝G·A8321/渝G·B1672/渝G·C5903',progress:78,task:'滑坡体清运·半幅抢通'},
+                    {name:'武隆抢通二队',status:'远端分流',cls:'active',leader:'队长 刘志强',headcount:30,vehicles:'渝G·A9012/渝G·B2846',progress:65,task:'K124+200远端交通管制'},
+                    {name:'武隆巡查无人机组',status:'边坡监测',cls:'active',leader:'组长 陈明',headcount:4,vehicles:'DJI-M300×2',progress:92,task:'三维扫描·位移复核'},
+                    {name:'城口防汛三队',status:'待命',cls:'standby',leader:'队长 赵铁军',headcount:28,vehicles:'渝F·C7761等4台',progress:0,task:'驰援待命'},
+                    {name:'黔江应急四队',status:'待命',cls:'standby',leader:'队长 孙海涛',headcount:38,vehicles:'渝H·D3345等6台',progress:0,task:'物资增援待命'},
+                    {name:'渝东南地质专家组',status:'技术研判',cls:'standby',leader:'首席 周文渊',headcount:8,vehicles:'渝G·E8820',progress:45,task:'滑坡稳定性评估'}
                 ]);
                 
                 // 动态数据状态
@@ -658,21 +811,21 @@
                 });
                 const equipSummary = ref({ total: 73, online: 63, repair: 6, offline: 4 });
                 const equipDetail = ref({
-                    excavator:  { total: 8,  online: 6 },
-                    loader:     { total: 12, online: 10 },
-                    generator:  { total: 15, online: 13 },
-                    pump_truck: { total: 6,  online: 5 },
-                    lighting:   { total: 32, online: 29 }
+                    excavator:  { total: 8,  online: 6, ids:'小松PC360/日立ZX350/三一SY365' },
+                    loader:     { total: 12, online: 10, ids:'柳工856H/临工L955F' },
+                    generator:  { total: 15, online: 13, ids:'康明斯100KW×4/玉柴50KW×3' },
+                    pump_truck: { total: 6,  online: 5, ids:'东风牌排水车/陕汽应急泵车' },
+                    lighting:   { total: 32, online: 29, ids:'移动照明灯塔×12/LED投光灯×17' }
                 });
                 const alerts = [
-                    {id:1,content:'S203 K124+300 山体滑坡：二级响应已启动，半幅已抢通',time:'2025-05-16 08:31',color:'red',status:'处置中',statusCls:'pending'},
-                    {id:2,content:'S203 K124+300 边坡位移红色预警：位移速率 3.2mm/h',time:'2025-05-16 08:15',color:'red',status:'已触发',statusCls:'pending'},
-                    {id:3,content:'武隆抢通一队抵达现场：32人/挖掘机2台/装载机2台/自卸车6台',time:'2025-05-16 08:50',color:'orange',status:'执行中',statusCls:'handled'},
-                    {id:4,content:'G319 武隆段 K56+800 积水深度 0.45m，已降速管制',time:'2025-05-15 14:10',color:'orange',status:'已处理',statusCls:'handled'},
-                    {id:5,content:'S204 K89+100 暴雨橙色预警，小源地淹没风险升高',time:'2025-05-14 18:37',color:'orange',status:'已响应',statusCls:'handled'},
-                    {id:6,content:'城口 S202 K38+200 边坡位移预警，持续监测',time:'2025-05-14 22:45',color:'yellow',status:'监测中',statusCls:'handled'},
-                    {id:7,content:'武隆仙女山景区公路 K4+300 落石预警，已设置防护网',time:'2025-05-12 16:50',color:'red',status:'已处置',statusCls:'handled'},
-                    {id:8,content:'S501 武隆兵赋公路 K15+100 路基冲刷预警',time:'2025-05-11 09:33',color:'yellow',status:'监测中',statusCls:'handled'}
+                    {id:1,content:'S203 K124+300 山体滑坡：二级响应已启动，半幅已抢通',time:'2025-05-16 08:31',color:'red',status:'处置中',statusCls:'pending',progress:78,owner:'值班长 李卫东 / 抢通一队 王建军'},
+                    {id:2,content:'S203 K124+300 边坡位移红色预警：位移速率 3.2mm/h',time:'2025-05-16 08:15',color:'red',status:'已触发',statusCls:'pending',progress:100,owner:'监测组 陈明 / 调度 王雪梅'},
+                    {id:3,content:'武隆抢通一队抵达现场：32人/挖掘机2台/装载机2台/自卸车6台',time:'2025-05-16 08:50',color:'orange',status:'执行中',statusCls:'handled',progress:92,owner:'队长 王建军 / 安全员 张强'},
+                    {id:4,content:'G319 武隆段 K56+800 积水深度 0.45m，已降速管制',time:'2025-05-15 14:10',color:'orange',status:'已处理',statusCls:'handled',progress:100,owner:'城口防汛三队 赵铁军'},
+                    {id:5,content:'S204 K89+100 暴雨橙色预警，小源地淹没风险升高',time:'2025-05-14 18:37',color:'orange',status:'已响应',statusCls:'handled',progress:100,owner:'黔江应急四队 孙海涛'},
+                    {id:6,content:'城口 S202 K38+200 边坡位移预警，持续监测',time:'2025-05-14 22:45',color:'yellow',status:'监测中',statusCls:'handled',progress:45,owner:'巡查组 李伟 / 地质专家 周文渊'},
+                    {id:7,content:'武隆仙女山景区公路 K4+300 落石预警，已设置防护网',time:'2025-05-12 16:50',color:'red',status:'已处置',statusCls:'handled',progress:100,owner:'养护中心 郑国强'},
+                    {id:8,content:'S501 武隆兵赋公路 K15+100 路基冲刷预警',time:'2025-05-11 09:33',color:'yellow',status:'监测中',statusCls:'handled',progress:60,owner:'巡查组 吴建国'}
                 ];
 
                 let scenarioRadar=null,scenarioBar=null,fullRadar=null,largeChart=null,resourceChart=null,evalRadar=null,evalBar=null,timelineChart=null,summaryRadar=null,scoreTrendChart=null,dimensionRadar=null,dimensionBar=null,disasterPie=null,equipDonut=null,teamDonut=null;
@@ -758,6 +911,15 @@
                 const getBarTitle=(tab)=>({flood:'排水保障指标',slide:'清障与监测指标',subsidence:'加固与绕行指标'}[tab]);
                 const getEvalTitle=(tab)=>({flood:'排水保障评估细则',slide:'滑坡处置评估细则',subsidence:'塌陷抢修评估细则'}[tab]);
                 const getEvalItems=(tab)=>{const dd=generateDrillData(tab);return dd.evalItems;};
+                const drillTimeline = [
+                    {time:'08:15:22',title:'边坡监测预警',desc:'S203 K124+300 位移传感器触发红色预警，位移速率 3.2mm/h',owner:'监测组 陈明',done:true},
+                    {time:'08:23:45',title:'灾害现场确认',desc:'无人机回传：滑坡体约 3200m³，半幅路面被埋，1辆社会车辆滞留',owner:'巡查组 李伟',done:true},
+                    {time:'08:31:06',title:'应急联动启动',desc:'区交通局、交警大队、养护中心三方会商，启动二级应急响应',owner:'值班长 李卫东',done:true},
+                    {time:'08:50:44',title:'抢险队伍抵达',desc:'武隆抢通一队 32 人及装备到达 K124+200 集结点',owner:'队长 王建军',done:true},
+                    {time:'09:15:00',title:'半幅抢通完成',desc:'累计清运土石方 1800m³，S203 半幅路面恢复通行',owner:'安全员 张强',done:true},
+                    {time:'11:40:22',title:'险情处置完毕',desc:'滑坡体全部清运，边坡防护网铺设完成，恢复双向通行',owner:'地质专家 周文渊',done:true},
+                    {time:'当前',title:'持续监测中',desc:'降雨橙色预警生效，位移传感器加密至 5min/次',owner:'监测组 陈明',done:false}
+                ];
                 // ========== 动态演练数据生成器 ==========
                 const drillDataSeed = ref(0); // 刷新计数器，点击刷新按钮时递增
                 const generateDrillData=(type)=>{
@@ -900,7 +1062,10 @@
                 // ========== 地图与标记 ==========
                 const buildPopupContent=(disaster,canvasId)=>{
                     let riskLevel='低风险',riskColor='#3b82f6';if(disaster.riskIndex>=80){riskLevel='高风险';riskColor='#ef4444';}else if(disaster.riskIndex>=60){riskLevel='中风险';riskColor='#f97316';}
-                    return `<div style="min-width:280px"><div class="flex justify-between items-center border-b border-slate-600 pb-2 mb-2"><span class="font-bold text-cyan-300 text-sm">${disaster.name}</span><span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:${riskColor}20;color:${riskColor}">${riskLevel}</span></div><div class="space-y-2 text-xs"><div><div class="flex justify-between mb-0.5"><span class="text-slate-400">风险指数</span><span>${disaster.riskIndex}分</span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${disaster.riskIndex}%;background:${riskColor}"></div></div></div><div><span class="text-slate-400">影响道路</span><br><span class="text-white text-xs">${disaster.road}</span></div><div><span class="text-slate-400">当前阶段</span><br><span class="text-white text-xs">${disaster.currentPhase}</span></div><div><span class="text-slate-400">建议动作</span><br><span class="text-white text-xs">${disaster.suggestion}</span></div><canvas id="${canvasId}" width="280" height="100" class="scene-canvas" style="width:100%;height:100px"></canvas><div class="flex gap-2 mt-1"><button id="btn_action_${canvasId}" class="btn-glow text-xs w-full" style="padding:4px 8px">启动处置方案</button><button id="btn_snapshot_${canvasId}" class="btn-glow text-xs w-full" style="padding:4px 8px;background:#334155">导出现场快照</button></div></div></div>`;
+                    const isMain = disaster.name.includes('S203') || disaster.name.includes('武隆S203');
+                    const mediaBox = isMain ? `<div style="background:#07121f;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:6px;margin:6px 0"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">🎥 现场回传 · S203 K124+300</div><div style="display:flex;gap:6px"><div style="flex:1;height:60px;background:linear-gradient(135deg,#0a1a2e,#0d2137);display:flex;align-items:center;justify-content:center;border-radius:3px;position:relative"><span style="font-size:20px">🚁</span><span style="position:absolute;top:2px;right:4px;background:#ef4444;color:#fff;font-size:8px;padding:0 3px;border-radius:2px">LIVE</span></div><div style="flex:1;height:60px;background:linear-gradient(135deg,#0a1a2e,#0d2137);display:flex;align-items:center;justify-content:center;border-radius:3px;position:relative"><span style="font-size:20px">📹</span><span style="position:absolute;top:2px;right:4px;background:#ef4444;color:#fff;font-size:8px;padding:0 3px;border-radius:2px">LIVE</span></div></div><div style="font-size:9px;color:#64748b;margin-top:4px">海拔 892m · 风速 3级 · 雨量 12mm/h · 能见度 1.2km</div></div>` : '';
+                    const logList = isMain ? `<div style="background:rgba(0,200,255,.05);border-radius:4px;padding:6px;margin:6px 0"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">📋 处置时间轴</div><div style="font-size:9px;line-height:1.6;color:#cbd5e1"><div><span style="color:#f97316">08:15</span> 位移传感器红色预警触发</div><div><span style="color:#f97316">08:23</span> 无人机确认滑坡体 3200m³</div><div><span style="color:#f97316">08:31</span> 启动二级应急响应</div><div><span style="color:#f97316">08:50</span> 抢通一队 32 人抵达现场</div><div><span style="color:#f97316">09:15</span> 半幅抢通，滞留车辆放行</div><div><span style="color:#f97316">11:40</span> 滑坡体清运完毕，恢复双向通行</div></div></div>` : `<div style="background:rgba(0,200,255,.05);border-radius:4px;padding:6px;margin:6px 0"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">📋 处置日志</div><div style="font-size:9px;color:#cbd5e1">${disaster.suggestion}</div></div>`;
+                    return `<div style="min-width:300px;max-width:340px"><div class="flex justify-between items-center border-b border-slate-600 pb-2 mb-2"><span class="font-bold text-cyan-300 text-sm">${disaster.name}</span><span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:${riskColor}20;color:${riskColor}">${riskLevel}</span></div><div class="space-y-2 text-xs"><div><div class="flex justify-between mb-0.5"><span class="text-slate-400">风险指数</span><span>${disaster.riskIndex}分</span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${disaster.riskIndex}%;background:${riskColor}"></div></div></div><div><span class="text-slate-400">影响道路</span><br><span class="text-white text-xs">${disaster.road}</span></div><div><span class="text-slate-400">当前阶段</span><br><span class="text-white text-xs">${disaster.currentPhase}</span></div>${mediaBox}${logList}<canvas id="${canvasId}" width="280" height="90" class="scene-canvas" style="width:100%;height:90px"></canvas><div class="flex gap-2 mt-1"><button id="btn_action_${canvasId}" class="btn-glow text-xs w-full" style="padding:4px 8px">启动处置方案</button><button id="btn_snapshot_${canvasId}" class="btn-glow text-xs w-full" style="padding:4px 8px;background:#334155">导出现场快照</button></div></div></div>`;
                 };
                 const drawSceneImage=(type,canvasId)=>{
                     const canvas=document.getElementById(canvasId);if(!canvas)return;const ctx=canvas.getContext('2d');const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#0f172a';ctx.fillRect(0,0,w,h);
@@ -1087,7 +1252,7 @@
                 onMounted(()=>{window.addEventListener('resize',handleResize);updateTime();timeInterval=setInterval(updateTime,1000);});
                 onUnmounted(()=>{window.removeEventListener('resize',handleResize);if(timeInterval)clearInterval(timeInterval);});
 
-                return {isLoggedIn,currentTab,toast,loginUsername,loginPassword,dashboardNavItems,topStats,skills,eventChain,teams,alerts,currentTime,login,setActiveTab,openExternal,executeAction,getActionBtnText,getScenarioName,getRadarTitle,getBarTitle,getEvalTitle,getEvalItems,refreshDrillData,drillDataSeed,showPlanModal,planLoading,planResult,planForm,generatePlan,evalLoading,evalResult,sampleMetrics,runAutoEval,evalParams,resetEvalParams,improvementPlan,roadOverview,responseMetrics,equipSummary,equipDetail,loadDynamicData};
+                return {isLoggedIn,currentTab,toast,loginUsername,loginPassword,dashboardNavItems,topStats,skills,eventChain,teams,alerts,currentTime,responseDuration,login,setActiveTab,openExternal,executeAction,getActionBtnText,getScenarioName,getRadarTitle,getBarTitle,getEvalTitle,getEvalItems,refreshDrillData,drillDataSeed,drillTimeline,showPlanModal,planLoading,planResult,planForm,generatePlan,evalLoading,evalResult,sampleMetrics,runAutoEval,evalParams,resetEvalParams,improvementPlan,roadOverview,responseMetrics,equipSummary,equipDetail,loadDynamicData};
             }
         }).mount('#app');
     </script>
