@@ -424,7 +424,7 @@ function animate(){
   renderer.render(scene,camera);
 }
 // ============ 窗口适配 ============
-window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+window.addEventListener('resize',function(){if(!camera||!renderer)return;camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
 // ============ 启动 ============
 function start(){
   initScene();
