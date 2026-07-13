@@ -239,12 +239,16 @@
                 <div class="ticker-label">🚨 实时警情</div>
                 <div class="ticker-content">
                     <div class="ticker-track">
-                        <span class="ticker-item"><strong>[08:15:22]</strong> S203 K124+300 边坡位移传感器触发红色预警，位移速率 3.2mm/h</span>
-                        <span class="ticker-item"><strong>[08:23:45]</strong> 巡查无人机确认：滑坡体约 3200m³，半幅路面被埋，1辆社会车辆滞留（人员已撤离）</span>
-                        <span class="ticker-item"><strong>[08:31:06]</strong> 区交通局/交警大队/养护中心三方会商，启动二级应急响应</span>
-                        <span class="ticker-item"><strong>[08:50:44]</strong> 武隆抢通一队 32 人、挖掘机 2 台、装载机 2 台、自卸车 6 台抵达现场</span>
-                        <span class="ticker-item"><strong>[09:15:00]</strong> 半幅抢通完成，累计清运土石方 1800m³，滞留车辆有序放行</span>
-                        <span class="ticker-item"><strong>[11:40:22]</strong> 滑坡体全部清运，边坡防护网铺设完成，路段恢复双向通行</span>
+                        <span class="ticker-item"><strong>[08:15:22]</strong> S203 K124+300 边坡发生滑坡，现场封锁处置就位</span>
+                        <span class="ticker-item"><strong>[08:30:10]</strong> 位移传感器触发红色预警，位移速率3.2mm/h，系统自动上报</span>
+                        <span class="ticker-item"><strong>[08:43:07]</strong> 巡查无人机确认：滑坡体约3200m³，半幅路面被埋，1辆社会车辆滞留（人员已撑离）</span>
+                        <span class="ticker-item"><strong>[08:51:33]</strong> 区交通局/交警大队/养护中心三方会商，启动二级应急响应并发布绕行信息</span>
+                        <span class="ticker-item"><strong>[09:05:18]</strong> 武隆抢通一队 32 人、挖掘机 2 台、装载机 2 台、自卸车 6 台全部出发</span>
+                        <span class="ticker-item"><strong>[09:40:25]</strong> 抢通一队到达 K124+200 集结点，展开现场勘察并进入作业状态</span>
+                        <span class="ticker-item"><strong>[09:55:00]</strong> 交通管制两端封锁到位，累计拦截42辆、绕行引导18辆</span>
+                        <span class="ticker-item"><strong>[10:12:47]</strong> 资源调拨完成，追加振动设备、工方、应急照明全部就位</span>
+                        <span class="ticker-item"><strong>[11:45:22]</strong> 半幅抢通完成，累计清运土石方1800m³，滞留车转有序放行</span>
+                        <span class="ticker-item"><strong>[14:20:00]</strong> 滑坡体全部清运，边坡防护网铺设完成，路段恢复双向通行，演练圈满结束</span>
                         <span class="ticker-item"><strong>[当前]</strong> 持续监测中，降雨橙色预警生效，位移传感器加密至 5min/次</span>
                     </div>
                 </div>
@@ -840,23 +844,28 @@
                 const evalLoading = ref(false);
                 const evalResult = ref(null);
                 const sampleMetrics = {
-                    drill_name:'2025年5月16日武隆区S203省道K124+300山体滑坡应急处置演练',
-                    drill_date:'2025-05-16',
+                    drill_name:'2025年武隆区S203山体滑坡应急演练',
+                    drill_date:'2025-05-20',
                     location:'武隆区S203省道K124+300',
                     disaster_type:'landslide',
                     events:[
-                        {time:'08:15:22',event:'边坡位移传感器红色预警',type:'warning_trigger'},
-                        {time:'08:23:45',event:'巡查无人机现场确认滑坡体约3200m³',type:'first_report'},
-                        {time:'08:31:06',event:'启动二级应急响应并发布绕行信息',type:'warning_publish'},
-                        {time:'08:50:44',event:'武隆抢通一队32人及装备抵达现场',type:'team_arrival'},
-                        {time:'09:15:00',event:'完成半幅抢通，滞留车辆放行',type:'half_road_clear'},
-                        {time:'11:40:22',event:'滑坡体清运完毕，恢复双向通行',type:'drill_end'}
+                        {time:'08:15:22',event:'灾害发生',type:'disaster_occur'},
+                        {time:'08:30:10',event:'监测预警触发',type:'warning_trigger'},
+                        {time:'08:43:07',event:'首次信息报送',type:'first_report'},
+                        {time:'08:51:33',event:'预警信息发布',type:'warning_publish'},
+                        {time:'09:05:18',event:'应急队伍出发',type:'team_dispatch'},
+                        {time:'09:40:25',event:'队伍抵达现场',type:'team_arrival'},
+                        {time:'09:55:00',event:'交通管制启动',type:'traffic_control'},
+                        {time:'10:12:47',event:'资源调拨完成',type:'resource_ready'},
+                        {time:'10:30:15',event:'作业区布设完成',type:'work_zone_setup'},
+                        {time:'11:45:22',event:'半幅道路抢通',type:'half_road_clear'},
+                        {time:'14:20:00',event:'演练结束',type:'drill_end'}
                     ],
-                    metrics:{first_report_time_min:28,warning_publish_time_min:17,warning_channels:5,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,electronic_tag_rate:100,work_zone_compliance:86,traffic_control_time_min:12,safety_training_pass_rate:96,emergency_communication_rate:97,archive_completeness:100,improvement_closure_rate:95,drill_record_timeliness:98}
+                    metrics:{first_report_time_min:28,warning_publish_time_min:17,warning_channels:4,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,electronic_tag_rate:100,work_zone_compliance:86,traffic_control_time_min:12,safety_training_pass_rate:96,emergency_communication_rate:97,archive_completeness:100,improvement_closure_rate:95,drill_record_timeliness:98}
                 };
 
                 // 可编辑的演练参数
-                const defaultEvalParams = {first_report_time_min:28,warning_publish_time_min:17,warning_channels:5,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,work_zone_compliance:86};
+                const defaultEvalParams = {first_report_time_min:28,warning_publish_time_min:17,warning_channels:4,team_arrival_time_min:35,half_road_clear_time_min:125,resource_dispatch_time_min:90,equipment_intact_rate:95,material_reserve_ratio:1.2,work_zone_compliance:86};
                 const evalParams = ref({...defaultEvalParams});
                 const resetEvalParams = ()=>{evalParams.value={...defaultEvalParams};};
 
@@ -912,13 +921,18 @@
                 const getEvalTitle=(tab)=>({flood:'排水保障评估细则',slide:'滑坡处置评估细则',subsidence:'塌陷抢修评估细则'}[tab]);
                 const getEvalItems=(tab)=>{const dd=generateDrillData(tab);return dd.evalItems;};
                 const drillTimeline = [
-                    {time:'08:15:22',title:'边坡监测预警',desc:'S203 K124+300 位移传感器触发红色预警，位移速率 3.2mm/h',owner:'监测组 陈明',done:true},
-                    {time:'08:23:45',title:'灾害现场确认',desc:'无人机回传：滑坡体约 3200m³，半幅路面被埋，1辆社会车辆滞留',owner:'巡查组 李伟',done:true},
-                    {time:'08:31:06',title:'应急联动启动',desc:'区交通局、交警大队、养护中心三方会商，启动二级应急响应',owner:'值班长 李卫东',done:true},
-                    {time:'08:50:44',title:'抢险队伍抵达',desc:'武隆抢通一队 32 人及装备到达 K124+200 集结点',owner:'队长 王建军',done:true},
-                    {time:'09:15:00',title:'半幅抢通完成',desc:'累计清运土石方 1800m³，S203 半幅路面恢复通行',owner:'安全员 张强',done:true},
-                    {time:'11:40:22',title:'险情处置完毕',desc:'滑坡体全部清运，边坡防护网铺设完成，恢复双向通行',owner:'地质专家 周文渊',done:true},
-                    {time:'当前',title:'持续监测中',desc:'降雨橙色预警生效，位移传感器加密至 5min/次',owner:'监测组 陈明',done:false}
+                    {time:'08:15:22',title:'灾害发生',desc:'S203 K124+300 边坡发生滑坡，现场封锁处置就位',owner:'监测组 陈明',done:true},
+                    {time:'08:30:10',title:'监测预警触发',desc:'边坡位移传感器触发红色预警，位移速率3.2mm/h，系统自动上报',owner:'监测组 陈明',done:true},
+                    {time:'08:43:07',title:'首次信息报送',desc:'巡查无人机回传现场信息：滑坡体约3200m³，半幅路面被埋，1辆社会车辆滞留（人员已撑离）',owner:'巡查组 李伟',done:true},
+                    {time:'08:51:33',title:'预警信息发布',desc:'区交通局、交警大队、养护中心三方会商，启动二级应急响应并发布绕行信息',owner:'値班长 李卫东',done:true},
+                    {time:'09:05:18',title:'应急队伍出发',desc:'武隆抢通一队32人、挖掘机2台、装载机2台、自卸车6台全部出发',owner:'队长 王建军',done:true},
+                    {time:'09:40:25',title:'队伍抵达现场',desc:'武隆抢通一队到达 K124+200 集结点，完成现场勘察并展开作业',owner:'队长 王建军',done:true},
+                    {time:'09:55:00',title:'交通管制启动',desc:'两端封锁到位，累计拦截车轨42辆，绕行车车18辆成功引导',owner:'交警 夏山',done:true},
+                    {time:'10:12:47',title:'资源调拨完成',desc:'追加振动设备、工方、应急照明到位，物资保障全部就位',owner:'物资科 李敏',done:true},
+                    {time:'10:30:15',title:'作业区布设完成',desc:'安全防护隔置、标志牌、反光锦标全部就位，作业区规范度86%',owner:'安全员 张强',done:true},
+                    {time:'11:45:22',title:'半幅抢通完成',desc:'累计清运土石方1800m³，S203半幅路面恢复通行，滞留车转有序放行',owner:'安全员 张强',done:true},
+                    {time:'14:20:00',title:'演练圈满结束',desc:'滑坡体全部清运，边坡防护网铺设完成，S203全线恢复双向通行，得分：130分',owner:'地质专家 周文渊',done:true},
+                    {time:'当前',title:'持续监测中',desc:'降雨橙色预警生效，位移传感器加密至5min/次',owner:'监测组 陈明',done:false}
                 ];
                 // ========== 动态演练数据生成器 ==========
                 const drillDataSeed = ref(0); // 刷新计数器，点击刷新按钮时递增
