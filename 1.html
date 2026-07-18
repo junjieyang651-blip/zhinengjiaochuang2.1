@@ -262,18 +262,20 @@
             <!-- 全屏地图 -->
             <div class="fullscreen-map">
                 <div id="mainMap" class="w-full h-full"></div>
-                <div v-if="currentTab==='hall'" class="float-info" style="top:10px;left:300px">
+                <!-- 左侧地图浮层：平台标题（对齐左侧面板下方） -->
+                <div v-if="currentTab==='hall'" class="float-info" style="top:10px;left:300px;max-width:340px">
                     <p class="text-cyan-400 font-bold text-xs">📡 重庆山区公路数字孪生监测平台</p>
                     <p style="font-size:10px">▪ 覆盖 G319 武隆段 / S203 省道 / G65 渝湘段山区</p>
                     <p style="font-size:10px">▪ 今日重点：S203 K124+300 山体滑坡 · 二级响应</p>
                     <p style="font-size:10px">▪ 实时回传：无人机 1 架 · 位移传感器 12 个 · 车辆 10 台</p>
                 </div>
-                <div v-if="currentTab==='hall'" class="float-info" style="bottom:10px;right:10px;max-width:260px;border-color:rgba(0,200,255,.4)">
+                <!-- 右侧地图浮层：气象预警（对齐右侧面板下方，不放底部） -->
+                <div v-if="currentTab==='hall'" class="float-info" style="top:10px;right:300px;max-width:260px;border-color:rgba(0,200,255,.4)">
                     <div class="font-bold text-cyan-400">⚠️ 气象预警快报</div>
                     <div style="font-size:10px">武隆区: 暴雨橙色预警 | 24h累计雨量 78mm</div>
                     <div style="font-size:10px">S203 滑坡区: 降雨持续 · 已加密监测至 5min/次</div>
                     <div style="font-size:10px">城口县: 山洪蓝色风险 | 注意S202省道边坡</div>
-                    <div style="font-size:10px">G65包茂高速: 能见度较低 限速60km/h</div>
+                    <div style="font-size:10px">G65包茅高速: 能见度较低 限速60km/h</div>
                     <div class="mt-1 text-emerald-300" style="font-size:10px">▪ 应急响应等级: 二级响应 · 持续 16 小时</div>
                 </div>
                 <div v-if="['flood','slide','subsidence'].includes(currentTab)" class="float-info" style="top:10px;left:50%;transform:translateX(-50%);pointer-events:auto;border-color:rgba(249,115,22,.5)">
@@ -283,6 +285,17 @@
 
             <!-- ==================== 左侧面板组（演练大厅） ==================== -->
             <div v-if="currentTab==='hall'" class="left-panels">
+                <!-- 全重庆公路局全局视角（李老师建议：让用户感觉是重庆市公路局） -->
+                <div class="dash-panel" style="border-color:rgba(0,200,255,.5);background:rgba(0,200,255,.04)">
+                    <div class="panel-title" style="color:#00e0ff">🌆 重庆市公路网监测全局</div>
+                    <div class="stat-row"><span class="stat-label">全市公路总里程</span><span class="stat-val">36,000 <small>km</small></span></div>
+                    <div class="stat-row"><span class="stat-label">国省干线里程</span><span class="stat-val">8,500 <small>km</small></span></div>
+                    <div class="stat-row"><span class="stat-label">监测覆盖区县</span><span class="stat-val">38 <small>个</small></span></div>
+                    <div class="stat-row"><span class="stat-label">在线传感器总数</span><span class="stat-val warn">3,240 <small>个</small></span></div>
+                    <div class="stat-row"><span class="stat-label">今日活跃预警</span><span class="stat-val warn">12 <small>处</small></span></div>
+                    <div class="stat-row"><span class="stat-label">当前应急响应</span><span class="stat-val" style="color:#f97316">二级 · 武隆S203</span></div>
+                    <div style="margin-top:6px;padding-top:5px;border-top:1px dashed rgba(0,200,255,.2);font-size:9px;color:#64748b">▶ 下钻至武隆区 · 山区公路精细化监测</div>
+                </div>
                 <div class="dash-panel">
                     <div class="panel-title">武隆山区公路概况</div>
                     <div class="stat-row"><span class="stat-label">管辖公路总里程</span><span class="stat-val">{{ roadOverview.total_mileage }} <small>km</small></span></div>
@@ -426,42 +439,47 @@
                 </div>
             </div>
 
-            <!-- ==================== 演练底部面板 ==================== -->
-            <div v-if="['flood','slide','subsidence'].includes(currentTab)" class="drill-bottom">
-                <div class="drill-actions">
-                    <button @click="executeAction('clear')" class="btn-glow">{{getActionBtnText(currentTab,'clear')}}</button>
-                    <button @click="executeAction('pump')" class="btn-glow">{{getActionBtnText(currentTab,'pump')}}</button>
-                    <button @click="executeAction('warning')" class="btn-glow">{{getActionBtnText(currentTab,'warning')}}</button>
-                    <button @click="refreshDrillData" class="btn-glow" style="background:linear-gradient(135deg,#0e7490,#0891b2);border:1px solid rgba(0,200,255,0.3)" title="刷新演练数据">🔄 刷新数据</button>
+            <!-- ==================== 演练推演：左侧面板 ==================== -->
+            <div v-if="['flood','slide','subsidence'].includes(currentTab)" class="left-panels">
+                <div class="dash-panel">
+                    <div class="panel-title" style="font-size:11px">🎯 处置操作</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                        <button @click="executeAction('clear')" class="btn-glow" style="width:100%;padding:5px 8px;font-size:11px">{{getActionBtnText(currentTab,'clear')}}</button>
+                        <button @click="executeAction('pump')" class="btn-glow" style="width:100%;padding:5px 8px;font-size:11px">{{getActionBtnText(currentTab,'pump')}}</button>
+                        <button @click="executeAction('warning')" class="btn-glow" style="width:100%;padding:5px 8px;font-size:11px">{{getActionBtnText(currentTab,'warning')}}</button>
+                        <button @click="refreshDrillData" class="btn-glow" style="width:100%;padding:5px 8px;font-size:11px;background:linear-gradient(135deg,#0e7490,#0891b2);border:1px solid rgba(0,200,255,0.3)">🔄 刷新演练数据</button>
+                    </div>
                 </div>
-                <div class="drill-metrics">
-                    <div class="drill-metric-card">
-                        <div class="panel-title" style="font-size:11px">📡 {{getRadarTitle(currentTab)}}</div>
-                        <div id="scenarioRadar" class="echarts-container" style="height:200px"></div>
-                    </div>
-                    <div class="drill-metric-card">
-                        <div class="panel-title" style="font-size:11px">📊 {{getBarTitle(currentTab)}}</div>
-                        <div id="scenarioBar" class="echarts-container" style="height:200px"></div>
-                    </div>
-                    <div class="drill-metric-card">
-                        <div class="panel-title" style="font-size:11px">📋 {{getEvalTitle(currentTab)}}</div>
-                        <div style="font-size:11px;overflow-y:auto;max-height:200px" class="text-slate-300 pr-1">
-                            <div v-for="(item, idx) in getEvalItems(currentTab)" :key="item.label + drillDataSeed" class="score-card" style="padding:4px 6px;margin-bottom:4px">
-                                <span :class="item.color">●</span> {{item.label}}: {{item.value}}
-                            </div>
+                <div class="dash-panel">
+                    <div class="panel-title" style="font-size:11px">📡 {{getRadarTitle(currentTab)}}</div>
+                    <div id="scenarioRadar" class="echarts-container" style="height:200px"></div>
+                </div>
+                <div class="dash-panel">
+                    <div class="panel-title" style="font-size:11px">📋 {{getEvalTitle(currentTab)}}</div>
+                    <div style="font-size:11px;overflow-y:auto;max-height:200px" class="text-slate-300 pr-1">
+                        <div v-for="(item, idx) in getEvalItems(currentTab)" :key="item.label + drillDataSeed" class="score-card" style="padding:4px 6px;margin-bottom:4px">
+                            <span :class="item.color">●</span> {{item.label}}: {{item.value}}
                         </div>
                     </div>
-                    <div class="drill-metric-card" style="flex:1.2">
-                        <div class="panel-title" style="font-size:11px">⏱️ 实时处置时间轴</div>
-                        <div class="drill-timeline">
-                            <div class="dt-item" v-for="e in drillTimeline" :key="e.time">
-                                <div class="dt-dot" :class="e.done?'done':'active'"></div>
-                                <div class="dt-body">
-                                    <div class="dt-time">{{e.time}}</div>
-                                    <div class="dt-title">{{e.title}}</div>
-                                    <div class="dt-desc">{{e.desc}}</div>
-                                    <div class="dt-meta" v-if="e.owner">责任人：{{e.owner}}</div>
-                                </div>
+                </div>
+            </div>
+
+            <!-- ==================== 演练推演：右侧面板 ==================== -->
+            <div v-if="['flood','slide','subsidence'].includes(currentTab)" class="right-panels">
+                <div class="dash-panel">
+                    <div class="panel-title" style="font-size:11px">📊 {{getBarTitle(currentTab)}}</div>
+                    <div id="scenarioBar" class="echarts-container" style="height:200px"></div>
+                </div>
+                <div class="dash-panel">
+                    <div class="panel-title" style="font-size:11px">⏱️ 实时处置时间轴</div>
+                    <div class="drill-timeline">
+                        <div class="dt-item" v-for="e in drillTimeline" :key="e.time">
+                            <div class="dt-dot" :class="e.done?'done':'active'"></div>
+                            <div class="dt-body">
+                                <div class="dt-time">{{e.time}}</div>
+                                <div class="dt-title">{{e.title}}</div>
+                                <div class="dt-desc">{{e.desc}}</div>
+                                <div class="dt-meta" v-if="e.owner">责任人：{{e.owner}}</div>
                             </div>
                         </div>
                     </div>
@@ -1092,26 +1110,29 @@
                 const initMap=(containerId,markersData)=>{
                     const container=document.getElementById(containerId);if(!container)return;
                     if(window.mapCache&&window.mapCache[containerId])window.mapCache[containerId].remove();
-                    // MapLibre 3D 地形地图：Esri卫星(CORS) + 地形高程 + 倾斜视角
+                    // MapLibre：开场全重庆概览图，自动飞导到武隆区展示卫星细节
                     const map=new maplibregl.Map({
                         container:containerId,
                         style:{
                             version:8,
                             sources:{
+                                // ESRI 暗色行政图（全重庆全局，展示行政区划+公路网）
+                                overview:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:16,attribution:'© Esri'},
+                                // ESRI 高清卫星影像（放大后显示米级地豞细节）
                                 satellite:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:20}
                             },
-                            layers:[{id:'satellite',type:'raster',source:'satellite'}],
+                            layers:[
+                                // 行政图：zoom<10显示，zoom 10~13渐变透明过渡
+                                {id:'overview-layer',type:'raster',source:'overview',paint:{'raster-opacity':['interpolate',['linear'],['zoom'],10,1,13,0]}},
+                                // 卫星图：zoom>10时渐入，zoom>13完全显示
+                                {id:'satellite-layer',type:'raster',source:'satellite',paint:{'raster-opacity':['interpolate',['linear'],['zoom'],10,0,13,1]}}
+                            ],
                             sky:{'sky-color':'#a0c8e8','sky-horizon-blend':0.5,'horizon-color':'#d0e0f0','horizon-fog-blend':0.2,'fog-color':'#d0e0f0','fog-ground-blend':0.12},
                             light:{anchor:'viewport',color:'#ffffff',intensity:0.85}
                         },
-                        center:[107.77,29.35],
-                        zoom:13,
-                        pitch:58,
-                        bearing:-25,
-                        maxZoom:20,
-                        minZoom:9,
-                        maxPitch:75,
-                        antialias:true
+                        // 开场：全重庆市全局视角
+                        center:[106.55,29.56],zoom:7,pitch:0,bearing:0,
+                        maxZoom:20,minZoom:5,maxPitch:75,antialias:true
                     });
                     map.addControl(new maplibregl.NavigationControl({visualizePitch:true,showCompass:true,showZoom:true}),'top-right');
                     map.addControl(new maplibregl.ScaleControl({maxWidth:150}),'bottom-left');
@@ -1169,13 +1190,27 @@
                             el.addEventListener('mouseenter',()=>{hoverTimer=setTimeout(()=>{hoverPopup.setLngLat(lngLat).setHTML(`<div class="map-hover-card"><div class="map-hover-card-title">${m.name}</div><div class="map-hover-card-row"><span class="map-hover-card-label">风险指数</span><span class="map-hover-card-value" style="color:${riskColor}">${m.riskIndex} · ${riskLevel}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">当前状态</span><span class="map-hover-card-value">${m.currentPhase}</span></div><div class="map-hover-card-row"><span class="map-hover-card-label">建议措施</span><span style="color:#94a3b8;font-size:9px">${m.suggestion.substring(0,20)}...</span></div></div>`).addTo(map);},150);});
                             el.addEventListener('mouseleave',()=>{if(hoverTimer)clearTimeout(hoverTimer);setTimeout(()=>hoverPopup.remove(),100);});
                             // 弹窗打开后绑定 canvas 绘制和按钮事件
-                            popup.on('open',()=>{setTimeout(()=>{const c=document.getElementById(uid);if(c){c.width=280;c.height=90;drawSceneImage(m.type,uid);}const ab=document.getElementById(`btn_action_${uid}`);if(ab)ab.onclick=(e)=>{e.stopPropagation();showToast(`✅ 已启动${m.name}处置方案：${m.suggestion}`);};const sb=document.getElementById(`btn_snapshot_${uid}`);if(sb)sb.onclick=(e)=>{e.stopPropagation();showToast(`📸 现场快照已导出 (${m.name})`);};},50);});
+                            popup.on('open',()=>{
+                                // 点击灵晾点时自动飞导到该地点，并放大至卫星影像级别
+                                map.flyTo({center:lngLat,zoom:Math.max(map.getZoom(),14.5),pitch:62,bearing:-20,duration:1200,essential:true});
+                                setTimeout(()=>{const c=document.getElementById(uid);if(c){c.width=280;c.height=90;drawSceneImage(m.type,uid);}const ab=document.getElementById(`btn_action_${uid}`);if(ab)ab.onclick=(e)=>{e.stopPropagation();showToast(`✅ 已启动${m.name}处置方案：${m.suggestion}`);};const sb=document.getElementById(`btn_snapshot_${uid}`);if(sb)sb.onclick=(e)=>{e.stopPropagation();showToast(`📸 现场快照已导出 (${m.name})`);};},50);
+                            });
                         });
-                        // 延迟启用3D地形：等卫星瓦片全部加载后再加terrain，避免初始化时序冲突导致黑屏
+                        // 延迟启甩3D地形：等卫星瓦片全部加载后再加terrain，避免初始化时序冲突导致黑屏
                         map.once('idle',()=>{
                             if(!map.getSource('terrain')){
                                 map.addSource('terrain',{type:'raster-dem',tiles:['https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png'],encoding:'terrarium',tileSize:256,maxzoom:14});
                                 map.setTerrain({source:'terrain',exaggeration:1.5});
+                            }
+                            // 开场动画：全重庆全局图→自动飞导到武隆区展示卫星地豞细节
+                            if(containerId==='mainMap'){
+                                setTimeout(()=>{
+                                    map.flyTo({
+                                        center:[107.77,29.35],zoom:13,pitch:58,bearing:-25,
+                                        duration:5000,essential:true,
+                                        easing:t=>t<0.5?2*t*t:(4-2*t)*t-1
+                                    });
+                                },1500);
                             }
                         });
                     });
