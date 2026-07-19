@@ -225,13 +225,19 @@
                     <span style="font-size:11px;color:#00e0ff">⏱️ 处置已持续 {{responseDuration}}</span>
                 </div>
                 <div class="dash-header-title">重庆山区公路应急数字孪生演练系统</div>
-                <div class="dash-header-right">
-                    <button @click="showPlanModal=true" class="btn-glow" style="font-size:11px;padding:4px 12px">🤖 智能方案</button>
-                    <span id="weatherDisplay" style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:3px">🌤️ 重庆武隆 加载中...</span>
-                    <span style="font-size:11px;color:#94a3b8">|</span>
-                    <span style="font-size:11px;color:#34d399">在线：8人</span>
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-glow"></span>
-                    <span>值班：张建国</span>
+                <div class="dash-header-right" style="flex-direction:column;align-items:flex-end;gap:3px;padding-right:16px">
+                    <!-- 第一行：智能方案 + 天气 -->
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <button @click="showPlanModal=true" class="btn-glow" style="font-size:11px;padding:3px 10px">🤖 智能方案</button>
+                        <span id="weatherDisplay" style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:3px">🌤️ 重庆武隆 加载中...</span>
+                    </div>
+                    <!-- 第二行：在线人数 + 值班人 -->
+                    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">
+                        <span style="color:#34d399">在线：8人</span>
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-glow" style="width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0"></span>
+                        <span style="color:#64748b">|</span>
+                        <span>值班：张建国</span>
+                    </div>
                 </div>
             </header>
 
